@@ -39,6 +39,7 @@ export default {
 
     methods: {
 
+        //Switch Websites
         switchSite() {
             this.home = !this.home;
         },
