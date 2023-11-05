@@ -103,8 +103,8 @@ export default {
 
     methods: {
 
+        //Switching sites
         switchSite() {
-            console.log("hey");
             this.$emit("switchSite");
         },
         // --- IMAGE RELATED METHODS ---

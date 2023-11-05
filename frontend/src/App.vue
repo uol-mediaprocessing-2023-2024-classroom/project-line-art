@@ -39,8 +39,7 @@ export default {
 
     methods: {
 
-        async switchSite() {
-            console.log("hey from main");
+        switchSite() {
             this.home = !this.home;
         },
         /* 

@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <h1>hey</h1>
+        <h1>Herzlich willkommen bei LineArt!</h1>
         <v-btn @click="mainPage">MainPage</v-btn>
     </v-container>
 </template>
@@ -12,7 +12,6 @@
 
     methods:  {
         mainPage() {
-            console.log("hey from login")
             this.$emit("switchSide");
         }
     }
