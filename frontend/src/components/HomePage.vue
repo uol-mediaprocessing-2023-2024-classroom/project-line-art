@@ -65,6 +65,7 @@
             </div>
             <button class="loadMoreBtn" @click="$emit('loadMore')">Load more</button>
         </div>
+        <v-btn @click="switchSite">Login</v-btn>
     </v-container>
 </template>
 
@@ -101,6 +102,11 @@ export default {
     },
 
     methods: {
+
+        switchSite() {
+            console.log("hey");
+            this.$emit("switchSite");
+        },
         // --- IMAGE RELATED METHODS ---
 
         // Emit a loadImages event.

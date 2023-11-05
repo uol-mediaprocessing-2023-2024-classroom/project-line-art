@@ -4,20 +4,23 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage :selectedImage="selectedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @getBlur="getBlur" @resetGallery="resetGallery" />
+            <HomePage v-if="home" :selectedImage="selectedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @getBlur="getBlur" @resetGallery="resetGallery" @switchSite="switchSite"/>
+            <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
-</template>
+</template> 
 
 <script>
 import HomePage from "./components/HomePage";
 import placeholder from "./assets/placeholder.jpg";
+import LoginPage from "./components/LoginPage.vue";
 
 export default {
     name: "App",
 
     components: {
         HomePage,
+        LoginPage,
     },
 
     data() {
@@ -26,6 +29,7 @@ export default {
                 url: placeholder,
                 id: "placeholder"
             },
+            home: true,
             currentGallery: [],
             allImgData: [],
             limit: 60,
@@ -35,6 +39,10 @@ export default {
 
     methods: {
 
+        async switchSite() {
+            console.log("hey from main");
+            this.home = !this.home;
+        },
         /* 
           This method fetches the first 60 images from a user's gallery. 
           It first retrieves all image IDs, then it fetches specific image data. 
