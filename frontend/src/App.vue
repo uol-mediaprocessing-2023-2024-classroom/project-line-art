@@ -29,7 +29,7 @@ export default {
                 url: placeholder,
                 id: "placeholder"
             },
-            home: true,
+            home: false,
             currentGallery: [],
             allImgData: [],
             limit: 60,

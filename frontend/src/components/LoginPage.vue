@@ -6,14 +6,14 @@
             <input required placeholder="Email" v-model="loginData.email" type="email" name="email" autocomplete="email" />
             <h2>Passwort:</h2>
             <input required placeholder="Password" v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
-            <v-btn @click="login" :disabled="awaitingLoginResponse" >
+            <v-btn @click="login" :disabled="awaitingLoginResponse" class="loginButton">
                 <v-progress-circular indeterminate color="grey lighten-5" v-if="awaitingLoginResponse"></v-progress-circular>
                 <div v-else>
                     {{ this.loginButtonText }}
                 </div>
             </v-btn>
         </div>
-        <v-btn @click="mainPage">MainPage</v-btn>
+        <!--<v-btn @click="mainPage">MainPage</v-btn>-->
     </v-container>
 </template>
 
@@ -206,3 +206,63 @@
 
     }
 </script>
+
+<style scoped>
+    .container{
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: #3Defff;
+    }
+
+    h1{
+        width: 75%;
+        height: fit-content;
+        color: #000;
+        text-align: center;
+        font: Arial;
+        font-size: 90px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        margin-bottom: 30px;
+    }
+
+    h2{
+        width: fit-content;
+        height: fit-content;
+        color: #000;
+        text-align: center;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 40px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        margin-bottom: 8px;
+    }
+
+    input{
+        width: 600px;
+        height: 100px;
+        border-radius: 10px;
+        background: #FDFDFD;
+        margin-bottom: 10px;
+        font-size: 40px;
+    }
+
+    .loginField{
+        size:fit-content;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        max-width: max-content;
+    }
+
+    .loginButton{
+        width: 100px;
+    }
+</style>
