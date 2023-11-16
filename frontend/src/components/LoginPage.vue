@@ -3,9 +3,9 @@
         <h1>Herzlich willkommen bei LineArt!</h1>
         <div class="loginField">
             <h2>E-mail</h2>
-            <input required placeholder="Email" v-model="loginData.email" type="email" name="email" autocomplete="email" />
+            <input required  v-model="loginData.email" type="email" name="email" autocomplete="email" />
             <h2>Passwort:</h2>
-            <input required placeholder="Password" v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
+            <input required  v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
             <v-btn @click="login" :disabled="awaitingLoginResponse" class="loginButton">
                 <v-progress-circular indeterminate color="grey lighten-5" v-if="awaitingLoginResponse"></v-progress-circular>
                 <div v-else>
@@ -233,10 +233,10 @@
     }
 
     h2{
-        width: fit-content;
+        width: 100%;
         height: fit-content;
         color: #000;
-        text-align: center;
+        text-align: left;
         font-family: 'Times New Roman', Times, serif;
         font-size: 40px;
         font-style: normal;
@@ -249,20 +249,26 @@
         width: 600px;
         height: 100px;
         border-radius: 10px;
-        background: #FDFDFD;
+        background-color: #FDFDFD;
         margin-bottom: 10px;
         font-size: 40px;
+        border-radius: 10px;
     }
 
     .loginField{
         size:fit-content;
         display: flex;
         flex-direction: column;
+        align-items: center;
         justify-content: space-between;
         max-width: max-content;
     }
 
-    .loginButton{
-        width: 100px;
+    .v-btn.loginButton{
+        min-width: 150px;
+        min-height: 50px;
+        margin-top: 30px;
+        background-color: #5ea8fe;
+        border-radius: 20px;
     }
 </style>
