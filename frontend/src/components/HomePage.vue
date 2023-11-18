@@ -1,40 +1,69 @@
 <template>
     <v-container>
-        <div class="selectedImageField">
-            <div class="selectedImageContainer">
-
-                <div class="selectedImageInfo">
-                    <h2>Selected Image: <br /></h2>
+        <div class="header">
+            <div class="projektName">
+                <h1>
+                    LineArt
+                </h1>
+            </div>
+            <div class="userInformation">
+                <div>
+                    Logged in as: {{ this.userName }}
                 </div>
-
-                <div style="display: flex">
-                    <img class="selectedImg" v-bind:src="selectedImage.url" />
-                    <div class="inputField">
-                        <input placeholder="Your CEWE cldID" class="idInput" v-model="cldId" />
+                <div>
+                    <input placeholder="Your CEWE cldID" class="idInput" v-model="cldId"/>
                         <!-- Simple button that calls the method 'loadImages' -->
-                        <button class="basicButton" @click="loadImages(cldId)">
-                            Load Images
-                        </button>
-
-                        <button class="basicButton" @click="getBlur(selectedImage.id)">
-                            Apply Blur
-                        </button>
-
-                        <div>
-                            <h3>Image Info:<br /></h3>
-                            <p>
-                                {{ imageInfo.name }}
-                            </p>
-                            <p>
-                                {{ imageInfo.avgColor }}
-                            </p>
-                        </div>
-                    </div>
                 </div>
+            </div>
+            <div class="logoutArea">
+                <v-btn @click="switchSite">Logout</v-btn>
             </div>
         </div>
 
+
+        <div class="MainImageArea">
+            <!-- selectImageArea -->
+            <div class="selectImageArea">
+                <div class="subHeader">
+                    <h2>Selected Image</h2>
+                </div>
+                <div class="imageArea">
+                    <img class="selectedImg" v-bind:src="selectedImage.url" />
+                </div>
+            </div>
+            <!-- optionArea -->
+            <div class="optionArea" >
+                <div class="subHeader">
+
+                </div>
+                <div style="display: flex; flex-grow: 1; flex-direction: column;">
+                    <button class="basicButton" @click="loadImages(cldId)">
+                        Load Images
+                    </button>
+                    Settings:
+                    <div class="selectSegmentOption">
+
+                    </div>
+                    <button class="basicButton" @click="getBlur(selectedImage.id)">
+                        Process
+                    </button>
+            </div>
+            </div>
+            <!-- processedImageArea -->
+            <div class="processedImageArea">
+                <div class="subHeader">
+                    <h2>Processed Image</h2>
+                </div>
+                <div class="imageArea">
+                    <img class="selectedImg" v-bind:src="selectedImage.url" />
+                </div>
+            </div>
+
+        </div>
+  
         <div class="imageGalleryField">
+            Images:
+
             <div>
                 <v-row>
                     <v-col v-for="n in galleryImageNum" :key="n" class="d-flex child-flex" cols="2">
@@ -48,9 +77,8 @@
                     </v-col>
                 </v-row>
             </div>
-            <button class="loadMoreBtn" @click="$emit('loadMore')">Load more</button>
+            <!--<button class="loadMoreBtn" @click="$emit('loadMore')">Load more</button>-->
         </div>
-        <v-btn @click="switchSite">Login</v-btn>
     </v-container>
 </template>
 
@@ -85,7 +113,7 @@ export default {
 
         //Switching sites
         switchSite() {
-            this.$emit("switchSite");
+                        this.$emit("switchSite");
         },
         // --- IMAGE RELATED METHODS ---
 
@@ -143,6 +171,92 @@ export default {
 </script>
 
 <style scoped>
+
+/* Header CSS */
+.header {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    overflow-y: auto;
+    flex-grow: 1;
+    background-color: rgb(249, 251, 255);
+}
+
+.projektName {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    float: left;
+    flex-grow: 2;
+
+}
+
+.userInformation {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    padding: 1%; 
+    align-self: center;
+    flex-grow: 1;
+}
+.logoutArea {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    align-self: end;
+    align-items: center;
+}
+
+/* Main Area CSS */
+
+
+.MainImageArea {
+    display: flex;
+    flex-direction: row ;
+    padding: 1%;
+
+}
+.selectImageArea {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.optionArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10px;
+    width: 400px;
+    flex-grow: 1;
+}
+
+.selectSegmentOption{
+    display: flex;
+    border-radius: 10px;
+    padding: 1%;
+    overflow-y: auto;
+    flex-grow: 1;
+    background-color: rgb(249, 251, 255);
+}
+
+/* Kann vielleicht mit selectImageArea zusammen gelegt werden */
+.processedImageArea {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.subHeader {
+    height: 10%;
+    padding-bottom: 2%;
+    margin-bottom: 1%;
+}
 .selectedImageField {
     display: flex;
     flex-direction: row;
@@ -156,9 +270,8 @@ export default {
 .imageGalleryField {
     display: flex;
     flex-direction: column;
-    background-color: rgb(249, 251, 255);
+    
     border-radius: 10px;
-    box-shadow: 0 10px 10px 10px rgba(0, 0, 0, 0.1);
     color: black;
     padding: 1%;
     margin-top: 1%;
@@ -167,8 +280,8 @@ export default {
 }
 
 .selectedImg {
-    max-width: 500px;
-    max-height: 500px;
+    max-width: 450px;
+    max-height: 450px;
 }
 
 .selectedImageInfo {
@@ -176,17 +289,21 @@ export default {
 }
 
 .basicButton {
-    background-color: rgb(226, 215, 215);
+    background-color: rgb(249, 251, 255);
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
     width: 150px;
+    margin: 3px;
 }
 
 .idInput {
     margin-right: 8px;
     border: 1px solid #000;
     border-radius: 3px;
+    display: flex;
+    flex-grow: 1;
+    width: 90%;
 }
 
 .loginField {
