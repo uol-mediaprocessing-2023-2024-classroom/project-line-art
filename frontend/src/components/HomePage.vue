@@ -42,7 +42,17 @@
                     </button>
                     Settings:
                     <div class="selectSegmentOption">
-
+                        <form class="selectSegmentOptionForm">
+                            <fieldset>
+                                <input type="radio" id="noSegments" name="segment" value="noSegments">
+                                <label for="noSegments"> No colored segments</label> <br>
+                                <input type="radio" id="imageBased" name="segment" value="imageBased">
+                                <label for="imageBased"> Image-based color</label> <br>
+                                <input type="radio" id="selectColor" name="segment" value="selectColor">
+                                <label for="selectColor"> Select color</label> 
+                                <input placeholder="RGB Value" class="idInput" style="margin-left: 15px; width: 100px;">
+                            </fieldset>
+                        </form>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
                         Process
@@ -238,11 +248,16 @@ export default {
 
 .selectSegmentOption{
     display: flex;
-    border-radius: 10px;
-    padding: 1%;
     overflow-y: auto;
     flex-grow: 1;
+    align-items: center;
     background-color: rgb(249, 251, 255);
+}
+
+.selectSegmentOptionForm{
+    display: flex;
+    padding: 5%;
+    border-color: rgb(249, 251, 255);
 }
 
 /* Kann vielleicht mit selectImageArea zusammen gelegt werden */
