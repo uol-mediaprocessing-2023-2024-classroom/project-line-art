@@ -112,18 +112,18 @@ export default {
             };
         },
 
-        /* This method retrieves a blurred version of the selected image from the backend. */
+        /* This method retrieves a processed version of the selected image from the backend. */
         async processImage(selectedId, cldId) {
 
             const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
 
-            // Fetch the blurred image
+            // Fetch the processed image
             const response = await fetch(localUrl);
             const imageBlob = await response.blob();
-            const blurImgUrl = URL.createObjectURL(imageBlob);
+            const processedImageUrl = URL.createObjectURL(imageBlob);
 
-            // Update the selected image with the URL of the blurred image
-            this.processedImage.url = blurImgUrl;
+            // Update the selected image with the URL of the processed image
+            this.processedImage.url = processedImageUrl;
         },
 
         /* This method resets the current gallery and selected image. */

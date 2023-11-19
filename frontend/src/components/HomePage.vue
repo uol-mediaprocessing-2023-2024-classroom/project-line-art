@@ -129,7 +129,7 @@ export default {
             this.$emit("updateSelected", selectedId, this.cldId);
         },
 
-        // Emit a getBlur event with the ID of the selected image.
+        // Emit a processImage event with the ID of the selected image.
         processImage(selectedId) {
             this.$emit("processImage", selectedId, this.cldId);
         },
