@@ -44,7 +44,7 @@
                     <div class="selectSegmentOption">
 
                     </div>
-                    <button class="basicButton" @click="getBlur(selectedImage.id)">
+                    <button class="basicButton" @click="processImage(selectedImage.id)">
                         Process
                     </button>
             </div>
@@ -55,7 +55,7 @@
                     <h2>Processed Image</h2>
                 </div>
                 <div class="imageArea">
-                    <img class="selectedImg" v-bind:src="selectedImage.url" />
+                    <img class="selectedImg" v-bind:src="processedImage.url" />
                 </div>
             </div>
 
@@ -107,13 +107,14 @@ export default {
     props: {
         selectedImage: Object,
         currentGallery: Array,
+        processedImage: Object
     },
 
     methods: {
 
         //Switching sites
         switchSite() {
-                        this.$emit("switchSite");
+            this.$emit("switchSite");
         },
         // --- IMAGE RELATED METHODS ---
 
@@ -129,8 +130,8 @@ export default {
         },
 
         // Emit a getBlur event with the ID of the selected image.
-        getBlur(selectedId) {
-            this.$emit("getBlur", selectedId, this.cldId);
+        processImage(selectedId) {
+            this.$emit("processImage", selectedId, this.cldId);
         },
     },
 
@@ -153,8 +154,8 @@ export default {
         // Watcher function for updating the displayed image information.
         selectedImage: function () {
             this.imageInfo = {
-                name: "Name: " + this.selectedImage.name,
-                avgColor: "Average color: " + this.selectedImage.avgColor,
+                name: "Name: " + this.processImage.name,
+                avgColor: "Average color: " + this.processImage.avgColor,
             };
         },
     },

@@ -4,7 +4,7 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage v-if="home" :selectedImage="selectedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @getBlur="getBlur" @resetGallery="resetGallery" @switchSite="switchSite"/>
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite"/>
             <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
@@ -26,6 +26,10 @@ export default {
     data() {
         return {
             selectedImage: {
+                url: placeholder,
+                id: "placeholder"
+            },
+            processedImage:{
                 url: placeholder,
                 id: "placeholder"
             },
@@ -109,9 +113,9 @@ export default {
         },
 
         /* This method retrieves a blurred version of the selected image from the backend. */
-        async getBlur(selectedId, cldId) {
+        async processImage(selectedId, cldId) {
 
-            const localUrl = `http://127.0.0.1:8000/get-blur/${cldId}/${selectedId}`;
+            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
 
             // Fetch the blurred image
             const response = await fetch(localUrl);
@@ -119,13 +123,17 @@ export default {
             const blurImgUrl = URL.createObjectURL(imageBlob);
 
             // Update the selected image with the URL of the blurred image
-            this.selectedImage.url = blurImgUrl;
+            this.processedImage.url = blurImgUrl;
         },
 
         /* This method resets the current gallery and selected image. */
         resetGallery() {
 
             this.selectedImage = {
+                url: placeholder,
+                id: "placeholder"
+            };
+            this.processedImage = {
                 url: placeholder,
                 id: "placeholder"
             };

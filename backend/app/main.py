@@ -37,8 +37,8 @@ def home():
     return {"Test": "Online"}
 
 
-@app.get("/get-blur/{cldId}/{imgId}")
-async def get_blur(cldId: str, imgId: str, background_tasks: BackgroundTasks):
+@app.get("/process-image/{cldId}/{imgId}")
+async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks):
     """
     Endpoint to retrieve a blurred version of an image.
     The image is fetched from a constructed URL and then processed to apply a blur effect.
@@ -47,7 +47,7 @@ async def get_blur(cldId: str, imgId: str, background_tasks: BackgroundTasks):
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
     download_image(image_url, img_path)
-    apply_blur(img_path)
+    process_image(img_path)
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -62,7 +62,7 @@ def download_image(image_url: str, img_path: str):
 
 
 # Opens the image from the given path and applies a box blur effect.
-def apply_blur(img_path: str):
+def process_image(img_path: str):
     blurImage = Image.open(img_path)
     blurImage = blurImage.filter(ImageFilter.BoxBlur(10))
     blurImage.save(img_path)
