@@ -265,10 +265,11 @@
     }
 
     .v-btn.loginButton{
-        min-width: 150px;
-        min-height: 50px;
+        min-width: 200px;
+        min-height: 66px;
         margin-top: 30px;
         background-color: #5ea8fe;
         border-radius: 20px;
+        font-size: xx-large;
     }
 </style>
