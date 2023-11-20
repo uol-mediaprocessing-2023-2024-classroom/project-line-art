@@ -16,9 +16,10 @@
                 </div>
             </div>
             <div class="logoutArea">
-                <v-btn @click="switchSite">Logout</v-btn>
+                <v-btn  @click="logout">Logout</v-btn>
             </div>
         </div>
+       
 
 
         <div class="MainImageArea">
@@ -126,6 +127,63 @@ export default {
         switchSite() {
             this.$emit("switchSite");
         },
+
+        // Helper method called by login(), logs out the user.
+        // Also resets saved website data.
+        async logout() {
+            if (!this.isLoggedIn) return;
+
+            const response = await this.sendLogoutRequest();
+            this.handleLogoutResponse(response);
+
+            this.switchSite();
+        },
+
+         // Helper method for clearing user data from the browsers local storage.
+         handleLogoutResponse() {
+            localStorage.cldId = "";
+            localStorage.userName = "";
+            localStorage.isLoggedIn = false;
+            this.resetData();
+        },
+
+        // Helper method for resetting saved data.
+        resetData() {
+            this.cldId = "";
+            this.isLoggedIn = false;
+            this.userName = "";
+            this.loginData = {
+                email: "",
+                password: ""
+            };
+            this.imageInfo = {
+                name: "",
+                avgColor: ""
+            };
+            this.$emit("resetGallery");
+        },
+        
+        async sendLogoutRequest() {
+            const requestOptions = {
+                method: "DELETE",
+                headers: {
+                    cldId: this.cldId,
+                    clientVersion: "0.0.1-medienVerDemo",
+                },
+            };
+
+            try {
+                const response = await fetch("https://cmp.photoprintit.com/api/account/session/?invalidateRefreshToken=true", requestOptions);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                this.handleRequestError(error);
+                return null;
+            }
+        },
+
         // --- IMAGE RELATED METHODS ---
 
         // Emit a loadImages event.
