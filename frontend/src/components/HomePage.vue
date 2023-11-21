@@ -42,17 +42,12 @@
                     </button>
                     Settings:
                     <div class="selectSegmentOption">
-                        <form class="selectSegmentOptionForm">
-                            <fieldset>
-                                <input type="radio" id="noSegments" name="segment" value="noSegments">
-                                <label for="noSegments"> No colored segments</label> <br>
-                                <input type="radio" id="imageBased" name="segment" value="imageBased">
-                                <label for="imageBased"> Image-based color</label> <br>
-                                <input type="radio" id="selectColor" name="segment" value="selectColor">
-                                <label for="selectColor"> Select color</label> 
-                                <input placeholder="RGB Value" class="idInput" style="margin-left: 15px; width: 100px;">
-                            </fieldset>
-                        </form>
+                        <v-radio-group>
+                            <v-radio label="No colored Segments" value="no Segments"></v-radio>
+                            <v-radio label="Image-based color" value="Image-based color"></v-radio>
+                            <v-radio label="Select Color" value="Select Color"></v-radio>
+                            <v-color-picker hide-canvas style="max-width: 350px; margin-right: 20PX;"></v-color-picker>
+                        </v-radio-group>
                     </div>
                     <button class="basicButton" @click="getBlur(selectedImage.id)">
                         Process
@@ -295,8 +290,8 @@ export default {
 }
 
 .selectedImg {
-    max-width: 450px;
-    max-height: 450px;
+    max-width: 430px;
+    max-height: 500px;
 }
 
 .selectedImageInfo {
