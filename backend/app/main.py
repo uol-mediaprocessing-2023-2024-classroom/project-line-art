@@ -16,7 +16,10 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # CORS configuration: specify the origins that are allowed to make cross-site requests
 origins = [
     "https://localhost:8080",
+    "https://localhost:8080/",
     "http://localhost:8080",
+    "http://localhost:8080/",
+    "*"
 ]
 
 app.add_middleware(
@@ -34,22 +37,22 @@ def home():
     return {"Test": "Online"}
 
 
-@app.get("/get-blur/{cldId}/{imgId}")
-async def get_blur(cldId: str, imgId: str, background_tasks: BackgroundTasks):
+@app.get("/process-image/{cldId}/{imgId}")
+async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks):
     """
-    Endpoint to retrieve a blurred version of an image.
-    The image is fetched from a constructed URL and then processed to apply a blur effect.
+    Endpoint to retrieve a processed version of an image.
+    The image is fetched from a constructed URL and then processed.
     """
     img_path = f"app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
     download_image(image_url, img_path)
-    apply_blur(img_path)
+    process_image(img_path)
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
 
-    # Send the blurred image file as a response
+    # Send the processed image file as a response
     return FileResponse(img_path)
 
 
@@ -59,10 +62,10 @@ def download_image(image_url: str, img_path: str):
 
 
 # Opens the image from the given path and applies a box blur effect.
-def apply_blur(img_path: str):
-    blurImage = Image.open(img_path)
-    blurImage = blurImage.filter(ImageFilter.BoxBlur(10))
-    blurImage.save(img_path)
+def process_image(img_path: str):
+    processedImage = Image.open(img_path)
+    processedImage = processedImage.filter(ImageFilter.BoxBlur(10))
+    processedImage.save(img_path)
 
 
 # Deletes the file at the specified path.
