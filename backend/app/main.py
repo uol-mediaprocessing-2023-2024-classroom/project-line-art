@@ -124,8 +124,16 @@ def process_image_crop(img_path: str):
     masked = (mask_stack * processedImage) + ((1-mask_stack) * MASK_COLOR) # Blend
     masked = (masked * 255).astype('uint8')                     # Convert back to 8-bit 
     
-    cv2.imwrite(img_path, masked)
+    # split image into channels
+    c_red, c_green, c_blue = cv2.split(processedImage)
 
+    # merge with mask got on one of a previous steps
+    processedImage_a = cv2.merge((c_red, c_green, c_blue, mask.astype('float32') / 255.0))  
+
+    #cv2.imwrite(img_path, processedImage_a*255.0)
+    plt.imsave(img_path, processedImage_a)
+    
+   
 # Deletes the file at the specified path.
 def remove_file(path: str):
     os.unlink(path)
