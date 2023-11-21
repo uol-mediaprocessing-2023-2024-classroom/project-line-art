@@ -34,7 +34,6 @@ export default {
                 url: placeholder,
                 id: "placeholder"
             },
-            home: true,
             currentGallery: [],
             allImgData: [],
             limit: 60,
