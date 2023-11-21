@@ -29,6 +29,7 @@ export default {
                 url: placeholder,
                 id: "placeholder"
             },
+            home: false,
             processedImage:{
                 url: placeholder,
                 id: "placeholder"
