@@ -216,7 +216,7 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        background-color: #3Defff;
+        background-color: #D3efff;
     }
 
     h1{
