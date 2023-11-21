@@ -32,24 +32,21 @@
                 </div>
             </div>
             <!-- optionArea -->
-            <div class="optionArea" >
+            <div class="optionArea">
                 <div class="subHeader">
 
                 </div>
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
-                    <button class="basicButton" @click="loadImages(cldId)">
-                        Load Images
-                    </button>
                     Settings:
                     <div class="selectSegmentOption">
                         <v-radio-group>
-                            <v-radio label="No colored Segments" value="no Segments"></v-radio>
-                            <v-radio label="Image-based color" value="Image-based color"></v-radio>
+                            <v-radio label="No colored Segments" value="no Segments" true-value></v-radio>
+                            <v-radio label="Image-based color" value="Image-based color" ></v-radio>
                             <v-radio label="Select Color" value="Select Color"></v-radio>
-                            <v-color-picker hide-canvas style="max-width: 350px; margin-right: 20PX;"></v-color-picker>
+                            <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
                         </v-radio-group>
                     </div>
-                    <button class="basicButton" @click="getBlur(selectedImage.id)">
+                    <button class="basicButton" @click="getBlur(selectedImage.id)" style="margin-top: 10px;align-content: center; align-self: ;">
                         Process
                     </button>
             </div>
@@ -67,8 +64,13 @@
         </div>
   
         <div class="imageGalleryField">
-            Images:
-
+            <div style="display: flex; flex-direction: row ;">
+                Images: 
+                <v-btn @click="loadImages(cldId)" variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                    <svg-icon type="mdi" :path="path"></svg-icon>
+                </v-btn>
+            </div>
+           
             <div>
                 <v-row>
                     <v-col v-for="n in galleryImageNum" :key="n" class="d-flex child-flex" cols="2">
@@ -88,8 +90,14 @@
 </template>
 
 <script>
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiReload } from '@mdi/js';
+
 export default {
     name: "HomePage",
+        components: {
+            SvgIcon
+        },
 
     data() {
         return {
@@ -97,7 +105,7 @@ export default {
             cldId: "",
             userName: "",
             isLoggedIn: false,
-
+            path: mdiReload,
             // Image related data
             imageInfo: {
                 name: "",
@@ -237,6 +245,7 @@ export default {
     align-items: center;
     margin-left: 10px;
     width: 400px;
+    height: 100%;
     flex-grow: 1;
 }
 
@@ -245,6 +254,8 @@ export default {
     overflow-y: auto;
     flex-grow: 1;
     align-items: center;
+    margin-right: 5%;
+    height: 70%;
     background-color: rgb(249, 251, 255);
 }
 
@@ -263,6 +274,7 @@ export default {
 }
 
 .subHeader {
+    min-height: 50px;
     height: 10%;
     padding-bottom: 2%;
     margin-bottom: 1%;
@@ -305,6 +317,7 @@ export default {
     border-radius: 3px;
     width: 150px;
     margin: 3px;
+    align-self: center;
 }
 
 .idInput {
