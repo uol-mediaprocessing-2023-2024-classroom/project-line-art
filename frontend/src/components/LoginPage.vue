@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <h1>Herzlich willkommen bei LineArt!</h1>
+        <h1>Herzlich Willkommen <br /> bei LineArt!</h1>
         <div class="loginField">
             <h2>E-mail</h2>
             <input required  v-model="loginData.email" type="email" name="email" autocomplete="email" />
