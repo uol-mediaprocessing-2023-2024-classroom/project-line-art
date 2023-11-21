@@ -16,9 +16,10 @@
                 </div>
             </div>
             <div class="logoutArea">
-                <v-btn @click="switchSite">Logout</v-btn>
+                <v-btn  @click="logout">Logout</v-btn>
             </div>
         </div>
+       
 
 
         <div class="MainImageArea">
@@ -46,7 +47,8 @@
                             <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
                         </v-radio-group>
                     </div>
-                    <button class="basicButton" @click="getBlur(selectedImage.id)" style="margin-top: 10px;align-content: center; align-self: ;">
+                    <button class="basicButton" @click="processImage(selectedImage.id)">
+
                         Process
                     </button>
             </div>
@@ -57,7 +59,7 @@
                     <h2>Processed Image</h2>
                 </div>
                 <div class="imageArea">
-                    <img class="selectedImg" v-bind:src="selectedImage.url" />
+                    <img class="selectedImg" v-bind:src="processedImage.url" />
                 </div>
             </div>
 
@@ -120,14 +122,72 @@ export default {
     props: {
         selectedImage: Object,
         currentGallery: Array,
+        processedImage: Object
     },
 
     methods: {
 
         //Switching sites
         switchSite() {
-                        this.$emit("switchSite");
+            this.$emit("switchSite");
         },
+
+        // Helper method called by login(), logs out the user.
+        // Also resets saved website data.
+        async logout() {
+            if (!this.isLoggedIn) return;
+
+            const response = await this.sendLogoutRequest();
+            this.handleLogoutResponse(response);
+
+            this.switchSite();
+        },
+
+         // Helper method for clearing user data from the browsers local storage.
+         handleLogoutResponse() {
+            localStorage.cldId = "";
+            localStorage.userName = "";
+            localStorage.isLoggedIn = false;
+            this.resetData();
+        },
+
+        // Helper method for resetting saved data.
+        resetData() {
+            this.cldId = "";
+            this.isLoggedIn = false;
+            this.userName = "";
+            this.loginData = {
+                email: "",
+                password: ""
+            };
+            this.imageInfo = {
+                name: "",
+                avgColor: ""
+            };
+            this.$emit("resetGallery");
+        },
+        
+        async sendLogoutRequest() {
+            const requestOptions = {
+                method: "DELETE",
+                headers: {
+                    cldId: this.cldId,
+                    clientVersion: "0.0.1-medienVerDemo",
+                },
+            };
+
+            try {
+                const response = await fetch("https://cmp.photoprintit.com/api/account/session/?invalidateRefreshToken=true", requestOptions);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                this.handleRequestError(error);
+                return null;
+            }
+        },
+
         // --- IMAGE RELATED METHODS ---
 
         // Emit a loadImages event.
@@ -141,9 +201,9 @@ export default {
             this.$emit("updateSelected", selectedId, this.cldId);
         },
 
-        // Emit a getBlur event with the ID of the selected image.
-        getBlur(selectedId) {
-            this.$emit("getBlur", selectedId, this.cldId);
+        // Emit a processImage event with the ID of the selected image.
+        processImage(selectedId) {
+            this.$emit("processImage", selectedId, this.cldId);
         },
     },
 
@@ -166,8 +226,8 @@ export default {
         // Watcher function for updating the displayed image information.
         selectedImage: function () {
             this.imageInfo = {
-                name: "Name: " + this.selectedImage.name,
-                avgColor: "Average color: " + this.selectedImage.avgColor,
+                name: "Name: " + this.processImage.name,
+                avgColor: "Average color: " + this.processImage.avgColor,
             };
         },
     },
