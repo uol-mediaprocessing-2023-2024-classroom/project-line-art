@@ -16,7 +16,10 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # CORS configuration: specify the origins that are allowed to make cross-site requests
 origins = [
     "https://localhost:8080",
+    "https://localhost:8080/",
     "http://localhost:8080",
+    "http://localhost:8080/",
+    "*"
 ]
 
 app.add_middleware(
