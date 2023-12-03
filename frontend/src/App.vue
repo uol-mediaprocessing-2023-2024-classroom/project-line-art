@@ -1,28 +1,36 @@
 <template>
     <v-app>
-        <v-main>
+        <v-main style="background-color: rgb(204,238,255);">
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage :selectedImage="selectedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @getBlur="getBlur" @resetGallery="resetGallery" />
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite"/>
+            <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
-</template>
+</template> 
 
 <script>
 import HomePage from "./components/HomePage";
 import placeholder from "./assets/placeholder.jpg";
+import LoginPage from "./components/LoginPage.vue";
 
 export default {
     name: "App",
 
     components: {
         HomePage,
+        LoginPage,
     },
 
     data() {
         return {
             selectedImage: {
+                url: placeholder,
+                id: "placeholder"
+            },
+            home: false,
+            processedImage:{
                 url: placeholder,
                 id: "placeholder"
             },
@@ -35,6 +43,10 @@ export default {
 
     methods: {
 
+        //Switch Websites
+        switchSite() {
+            this.home = !this.home;
+        },
         /* 
           This method fetches the first 60 images from a user's gallery. 
           It first retrieves all image IDs, then it fetches specific image data. 
@@ -100,24 +112,28 @@ export default {
             };
         },
 
-        /* This method retrieves a blurred version of the selected image from the backend. */
-        async getBlur(selectedId, cldId) {
+        /* This method retrieves a processed version of the selected image from the backend. */
+        async processImage(selectedId, cldId) {
 
-            const localUrl = `http://127.0.0.1:8000/get-blur/${cldId}/${selectedId}`;
+            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
 
-            // Fetch the blurred image
+            // Fetch the processed image
             const response = await fetch(localUrl);
             const imageBlob = await response.blob();
-            const blurImgUrl = URL.createObjectURL(imageBlob);
+            const processedImageUrl = URL.createObjectURL(imageBlob);
 
-            // Update the selected image with the URL of the blurred image
-            this.selectedImage.url = blurImgUrl;
+            // Update the selected image with the URL of the processed image
+            this.processedImage.url = processedImageUrl;
         },
 
         /* This method resets the current gallery and selected image. */
         resetGallery() {
 
             this.selectedImage = {
+                url: placeholder,
+                id: "placeholder"
+            };
+            this.processedImage = {
                 url: placeholder,
                 id: "placeholder"
             };

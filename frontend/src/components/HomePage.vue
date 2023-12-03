@@ -1,55 +1,78 @@
 <template>
     <v-container>
-        <div class="selectedImageField">
-            <div class="selectedImageContainer">
-                <div class="loginField">
-                    <div style="display: flex" v-if="isUserNameEmpty">
-                        <input required placeholder="Email" v-model="loginData.email" type="email" name="email" autocomplete="email" />
-                        <input required placeholder="Password" v-model="loginData.password" type="password" name="password" autocomplete="password" />
-                    </div>
-                    <h1 v-if="!isUserNameEmpty" style="margin-right: 15px">
-                        {{ this.userName }}
-                    </h1>
-                    <v-btn class="clickable loginBtn" :disabled="awaitingLoginResponse" color="#d6d8e4" @click="login">
-                        <v-progress-circular indeterminate color="grey lighten-5" v-if="awaitingLoginResponse"></v-progress-circular>
-                        <div style="display: flex" v-else>
-                            {{ this.loginButtonText }}
-                        </div>
-                    </v-btn>
+        <div class="header">
+            <div class="projektName">
+                <h1>
+                    LineArt
+                </h1>
+            </div>
+            <div class="userInformation">
+                <div>
+                    Logged in as: {{ this.userName }}
                 </div>
-
-                <div class="selectedImageInfo">
-                    <h2>Selected Image: <br /></h2>
-                </div>
-
-                <div style="display: flex">
-                    <img class="selectedImg" v-bind:src="selectedImage.url" />
-                    <div class="inputField">
-                        <input placeholder="Your CEWE cldID" class="idInput" v-model="cldId" />
+                <div>
+                    <input placeholder="Your CEWE cldID" class="idInput" v-model="cldId"/>
                         <!-- Simple button that calls the method 'loadImages' -->
-                        <button class="basicButton" @click="loadImages(cldId)">
-                            Load Images
-                        </button>
-
-                        <button class="basicButton" @click="getBlur(selectedImage.id)">
-                            Apply Blur
-                        </button>
-
-                        <div>
-                            <h3>Image Info:<br /></h3>
-                            <p>
-                                {{ imageInfo.name }}
-                            </p>
-                            <p>
-                                {{ imageInfo.avgColor }}
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
+            <div class="logoutArea">
+                <v-btn  @click="logout">Logout</v-btn>
+            </div>
         </div>
+       
 
+
+        <div class="MainImageArea">
+            <!-- selectImageArea -->
+            <div class="selectImageArea">
+                <div class="subHeader">
+                    <h2>Selected Image</h2>
+                </div>
+                <div class="imageArea">
+                    <img class="selectedImg" v-bind:src="selectedImage.url" />
+                </div>
+            </div>
+            <!-- optionArea -->
+            <div class="optionArea">
+                <div class="subHeader">
+
+                </div>
+                <div style="display: flex; flex-grow: 1; flex-direction: column;">
+                    Settings:
+                    <div class="selectSegmentOption">
+                        <v-radio-group>
+                            <v-radio label="No colored Segments" value="no Segments" true-value></v-radio>
+                            <v-radio label="Image-based color" value="Image-based color" ></v-radio>
+                            <v-radio label="Select Color" value="Select Color"></v-radio>
+                            <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                        </v-radio-group>
+                    </div>
+                    <button class="basicButton" @click="processImage(selectedImage.id)">
+
+                        Process
+                    </button>
+            </div>
+            </div>
+            <!-- processedImageArea -->
+            <div class="processedImageArea">
+                <div class="subHeader">
+                    <h2>Processed Image</h2>
+                </div>
+                <div class="imageArea">
+                    <img class="selectedImg" v-bind:src="processedImage.url" />
+                </div>
+            </div>
+
+        </div>
+  
         <div class="imageGalleryField">
+            <div style="display: flex; flex-direction: row ;">
+                Images: 
+                <v-btn @click="loadImages(cldId)" variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                    <svg-icon type="mdi" :path="path"></svg-icon>
+                </v-btn>
+            </div>
+           
             <div>
                 <v-row>
                     <v-col v-for="n in galleryImageNum" :key="n" class="d-flex child-flex" cols="2">
@@ -63,14 +86,20 @@
                     </v-col>
                 </v-row>
             </div>
-            <button class="loadMoreBtn" @click="$emit('loadMore')">Load more</button>
+            <!--<button class="loadMoreBtn" @click="$emit('loadMore')">Load more</button>-->
         </div>
     </v-container>
 </template>
 
 <script>
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiReload } from '@mdi/js';
+
 export default {
     name: "HomePage",
+        components: {
+            SvgIcon
+        },
 
     data() {
         return {
@@ -78,12 +107,7 @@ export default {
             cldId: "",
             userName: "",
             isLoggedIn: false,
-            loginData: {
-                email: "",
-                password: ""
-            },
-            awaitingLoginResponse: false,
-
+            path: mdiReload,
             // Image related data
             imageInfo: {
                 name: "",
@@ -98,48 +122,14 @@ export default {
     props: {
         selectedImage: Object,
         currentGallery: Array,
+        processedImage: Object
     },
 
     methods: {
-        // --- IMAGE RELATED METHODS ---
 
-        // Emit a loadImages event.
-        loadImages() {
-            this.$emit("loadImages", this.cldId);
-        },
-
-        // Emit a updateSelected event with the ID of the selected image.
-        // This method is called when the user clicks/selects an image in the gallery of loaded images.
-        updateSelected(selectedId) {
-            this.$emit("updateSelected", selectedId, this.cldId);
-        },
-
-        // Emit a getBlur event with the ID of the selected image.
-        getBlur(selectedId) {
-            this.$emit("getBlur", selectedId, this.cldId);
-        },
-
-        // --- AUTHENTICATION RELATED METHODS ---
-
-        // Send a login request to the CEWE API test server.
-        // If the user is already logged in, send a logout request instead.
-        async login() {
-            if (this.isLoggedIn) {
-                this.logout();
-                return;
-            }
-
-            if (this.awaitingLoginResponse) return;
-            this.awaitingLoginResponse = true;
-
-            const requestOptions = this.getLoginRequestOptions();
-            const response = await this.sendLoginRequest(requestOptions);
-
-            if (response) {
-                this.handleLoginResponse(response);
-            }
-
-            this.awaitingLoginResponse = false;
+        //Switching sites
+        switchSite() {
+            this.$emit("switchSite");
         },
 
         // Helper method called by login(), logs out the user.
@@ -149,21 +139,12 @@ export default {
 
             const response = await this.sendLogoutRequest();
             this.handleLogoutResponse(response);
+
+            this.switchSite();
         },
 
-        // Helper method for saving user data in the browsers local storage.
-        handleLoginResponse(response) {
-            this.cldId = response.session.cldId;
-            this.userName = response.user.firstname;
-            this.isLoggedIn = true;
-
-            localStorage.cldId = this.cldId;
-            localStorage.userName = this.userName;
-            localStorage.isLoggedIn = this.isLoggedIn;
-        },
-
-        // Helper method for clearing user data from the browsers local storage.
-        handleLogoutResponse() {
+         // Helper method for clearing user data from the browsers local storage.
+         handleLogoutResponse() {
             localStorage.cldId = "";
             localStorage.userName = "";
             localStorage.isLoggedIn = false;
@@ -183,43 +164,9 @@ export default {
                 name: "",
                 avgColor: ""
             };
-            this.awaitingLoginResponse = false;
             this.$emit("resetGallery");
         },
-
-        // --- REQUEST HANDLERS ---
-
-        getLoginRequestOptions() {
-            return {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    clientVersion: "0.0.1-medienVerDemo",
-                    apiAccessKey: "6003d11a080ae5edf4b4f45481b89ce7",
-                },
-                body: JSON.stringify({
-                    login: this.loginData.email,
-                    password: this.loginData.password,
-                    deviceName: "Medienverarbeitung CEWE API Demo",
-                }),
-            };
-        },
-
-        async sendLoginRequest(requestOptions) {
-            let status = 0;
-            try {
-                const response = await fetch("https://cmp.photoprintit.com/api/account/session/", requestOptions);
-                status = response.status;
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            } catch (error) {
-                this.handleRequestError(error, status);
-                return null;
-            }
-        },
-
+        
         async sendLogoutRequest() {
             const requestOptions = {
                 method: "DELETE",
@@ -241,21 +188,23 @@ export default {
             }
         },
 
-        handleRequestError(error, status = 0) {
-            console.error("Request failed:", error);
-            if (status === 500 || status === 405) {
-                this.displayError("Internal error occurred, please try again later.");
-            } else if (status >= 400 && status < 500) {
-                this.displayError("Entered credentials are incorrect or the request was not properly formatted.");
-            } else {
-                this.displayError("Something went wrong, please try again.");
-            }
+        // --- IMAGE RELATED METHODS ---
+
+        // Emit a loadImages event.
+        loadImages() {
+            this.$emit("loadImages", this.cldId);
         },
 
-        displayError(message) {
-            alert(message);
+        // Emit a updateSelected event with the ID of the selected image.
+        // This method is called when the user clicks/selects an image in the gallery of loaded images.
+        updateSelected(selectedId) {
+            this.$emit("updateSelected", selectedId, this.cldId);
         },
 
+        // Emit a processImage event with the ID of the selected image.
+        processImage(selectedId) {
+            this.$emit("processImage", selectedId, this.cldId);
+        },
     },
 
     computed: {
@@ -277,18 +226,9 @@ export default {
         // Watcher function for updating the displayed image information.
         selectedImage: function () {
             this.imageInfo = {
-                name: "Name: " + this.selectedImage.name,
-                avgColor: "Average color: " + this.selectedImage.avgColor,
+                name: "Name: " + this.processImage.name,
+                avgColor: "Average color: " + this.processImage.avgColor,
             };
-        },
-
-        // Watcher function for updating login button text.
-        isLoggedIn(isLoggedIn) {
-            if (isLoggedIn) {
-                this.loginButtonText = "LOGOUT";
-            } else {
-                this.loginButtonText = "LOGIN";
-            }
         },
     },
 
@@ -304,6 +244,101 @@ export default {
 </script>
 
 <style scoped>
+
+/* Header CSS */
+.header {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    overflow-y: auto;
+    flex-grow: 1;
+    background-color: rgb(249, 251, 255);
+}
+
+.projektName {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    float: left;
+    flex-grow: 2;
+
+}
+
+.userInformation {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    padding: 1%; 
+    align-self: center;
+    flex-grow: 1;
+}
+.logoutArea {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 1%;
+    align-self: end;
+    align-items: center;
+}
+
+/* Main Area CSS */
+
+
+.MainImageArea {
+    display: flex;
+    flex-direction: row ;
+    padding: 1%;
+
+}
+.selectImageArea {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.optionArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10px;
+    width: 400px;
+    height: 100%;
+    flex-grow: 1;
+}
+
+.selectSegmentOption{
+    display: flex;
+    overflow-y: auto;
+    flex-grow: 1;
+    align-items: center;
+    margin-right: 5%;
+    height: 70%;
+    background-color: rgb(249, 251, 255);
+}
+
+.selectSegmentOptionForm{
+    display: flex;
+    padding: 5%;
+    border-color: rgb(249, 251, 255);
+}
+
+/* Kann vielleicht mit selectImageArea zusammen gelegt werden */
+.processedImageArea {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.subHeader {
+    min-height: 50px;
+    height: 10%;
+    padding-bottom: 2%;
+    margin-bottom: 1%;
+}
 .selectedImageField {
     display: flex;
     flex-direction: row;
@@ -317,9 +352,8 @@ export default {
 .imageGalleryField {
     display: flex;
     flex-direction: column;
-    background-color: rgb(249, 251, 255);
+    
     border-radius: 10px;
-    box-shadow: 0 10px 10px 10px rgba(0, 0, 0, 0.1);
     color: black;
     padding: 1%;
     margin-top: 1%;
@@ -328,7 +362,7 @@ export default {
 }
 
 .selectedImg {
-    max-width: 500px;
+    max-width: 430px;
     max-height: 500px;
 }
 
@@ -337,17 +371,22 @@ export default {
 }
 
 .basicButton {
-    background-color: rgb(226, 215, 215);
+    background-color: rgb(249, 251, 255);
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
     width: 150px;
+    margin: 3px;
+    align-self: center;
 }
 
 .idInput {
     margin-right: 8px;
     border: 1px solid #000;
     border-radius: 3px;
+    display: flex;
+    flex-grow: 1;
+    width: 90%;
 }
 
 .loginField {
