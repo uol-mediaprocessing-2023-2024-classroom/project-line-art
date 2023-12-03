@@ -1,19 +1,19 @@
 <template>
     <v-container>
-        <h1>Herzlich willkommen bei LineArt!</h1>
+        <h1>Herzlich Willkommen <br /> bei LineArt!</h1>
         <div class="loginField">
             <h2>E-mail</h2>
-            <input required placeholder="Email" v-model="loginData.email" type="email" name="email" autocomplete="email" />
+            <input required  v-model="loginData.email" type="email" name="email" autocomplete="email" />
             <h2>Passwort:</h2>
-            <input required placeholder="Password" v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
-            <v-btn @click="login" :disabled="awaitingLoginResponse" >
+            <input required  v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
+            <v-btn @click="login" :disabled="awaitingLoginResponse" class="loginButton">
                 <v-progress-circular indeterminate color="grey lighten-5" v-if="awaitingLoginResponse"></v-progress-circular>
                 <div v-else>
                     {{ this.loginButtonText }}
                 </div>
             </v-btn>
         </div>
-        <v-btn @click="mainPage">MainPage</v-btn>
+        <!--<v-btn @click="mainPage">MainPage</v-btn>-->
     </v-container>
 </template>
 
@@ -206,3 +206,70 @@
 
     }
 </script>
+
+<style scoped>
+    .container{
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: #D3efff;
+    }
+
+    h1{
+        width: 75%;
+        height: fit-content;
+        color: #000;
+        text-align: center;
+        font: Arial;
+        font-size: 90px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        margin-bottom: 30px;
+    }
+
+    h2{
+        width: 100%;
+        height: fit-content;
+        color: #000;
+        text-align: left;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 40px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        margin-bottom: 8px;
+    }
+
+    input{
+        width: 600px;
+        height: 100px;
+        border-radius: 10px;
+        background-color: #FDFDFD;
+        margin-bottom: 10px;
+        font-size: 40px;
+        border-radius: 10px;
+    }
+
+    .loginField{
+        size:fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        max-width: max-content;
+    }
+
+    .v-btn.loginButton{
+        min-width: 200px;
+        min-height: 66px;
+        margin-top: 30px;
+        background-color: #5ea8fe;
+        border-radius: 20px;
+        font-size: xx-large;
+    }
+</style>
