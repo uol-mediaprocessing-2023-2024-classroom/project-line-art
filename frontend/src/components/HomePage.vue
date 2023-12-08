@@ -238,6 +238,8 @@ export default {
             this.cldId = localStorage.cldId;
             this.userName = localStorage.userName;
             this.isLoggedIn = true;
+
+            this.$emit("loadImages", this.cldId);
         }
     },
 };
