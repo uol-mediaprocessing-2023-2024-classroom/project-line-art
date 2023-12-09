@@ -20,13 +20,17 @@
             </div>
         </div>
        
-
-
         <div class="MainImageArea">
             <!-- selectImageArea -->
             <div class="selectImageArea">
-                <div class="subHeader">
+                <div>
                     <h2>Selected Image</h2>
+                </div>
+                <div v-if="errorMessage" class="error-message">
+                    <v-btn variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                        <svg-icon type="mdi" :path="pathInformation"></svg-icon>
+                    </v-btn>
+                    {{ errorMessage }}
                 </div>
                 <div class="imageArea">
                     <img class="selectedImg" v-bind:src="selectedImage.url" />
@@ -48,15 +52,20 @@
                         </v-radio-group>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
-
                         Process
                     </button>
             </div>
             </div>
             <!-- processedImageArea -->
             <div class="processedImageArea">
-                <div class="subHeader">
+                <div>
                     <h2>Processed Image</h2>
+                </div>
+                <div v-if="informationImage" class="empty-placeholder">
+                    <v-btn variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                        <svg-icon type="mdi" ></svg-icon>
+                    </v-btn>
+                    {{ informationImage }}
                 </div>
                 <div class="imageArea">
                     <img class="selectedImg" v-bind:src="processedImage.url" />
@@ -94,6 +103,7 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiReload } from '@mdi/js';
+import { mdiInformation } from '@mdi/js';
 
 export default {
     name: "HomePage",
@@ -108,6 +118,7 @@ export default {
             userName: "",
             isLoggedIn: false,
             path: mdiReload,
+            pathInformation: mdiInformation,
             // Image related data
             imageInfo: {
                 name: "",
@@ -116,6 +127,8 @@ export default {
 
             // UI related
             loginButtonText: "LOGIN",
+            errorMessage: null,
+            informationImage: null,
         };
     },
 
@@ -199,11 +212,23 @@ export default {
         // This method is called when the user clicks/selects an image in the gallery of loaded images.
         updateSelected(selectedId) {
             this.$emit("updateSelected", selectedId, this.cldId);
+            // Setze die Fehlermeldung auf null, wenn die Verarbeitung erfolgreich ist
+            this.errorMessage = null;
+            this.informationImage = null;
         },
 
         // Emit a processImage event with the ID of the selected image.
         processImage(selectedId) {
-            this.$emit("processImage", selectedId, this.cldId);
+            // Füge hier den Code für die Fehlerüberprüfung ein
+            if(!selectedId || selectedId === "placeholder"){
+                // Wenn selectedId nicht vorhanden ist, setze die Fehlermeldung
+                this.errorMessage = "Please select a picture!";
+                this.informationImage = " ";
+                return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
+            } else{
+                // Fortfahren mit der Bildverarbeitung
+                this.$emit("processImage", selectedId, this.cldId);
+            }
         },
     },
 
@@ -425,5 +450,13 @@ export default {
     width: 100px;
     align-self: center;
     margin-top: 10px;
+}
+
+.error-message {
+  color: red;
+}
+
+.empty-placeholder {
+  background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
 }
 </style>

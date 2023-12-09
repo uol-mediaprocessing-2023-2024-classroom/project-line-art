@@ -4,7 +4,7 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite"/>
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" ref="homePage"/>
             <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
@@ -138,6 +138,14 @@ export default {
                 id: "placeholder"
             };
             this.currentGallery = [];
+        },
+
+        // Methode zum Anzeigen der Fehlermeldung in der HomePage.vue
+        showError(errorMessage) {
+            // Du könntest hier weitere Aktionen durchführen, z.B. Loggen
+            console.error(errorMessage);
+            // Aktualisiere die Fehlermeldung in der HomePage.vue
+            this.$refs.homePage.errorMessage = errorMessage;
         },
     },
 };
