@@ -68,7 +68,10 @@
                     {{ informationImage }}
                 </div>
                 <div class="imageArea">
-                    <img class="selectedImg" v-bind:src="processedImage.url" />
+                    <div v-if="loading" class="loading-overlay">
+                        Loading...
+                    </div>
+                    <img v-else class="selectedImg" v-bind:src="processedImage.url" />
                 </div>
             </div>
 
@@ -129,6 +132,7 @@ export default {
             loginButtonText: "LOGIN",
             errorMessage: null,
             informationImage: null,
+            loading: false, // Ladeeffekt aktivieren/deaktivieren
         };
     },
 
@@ -458,5 +462,16 @@ export default {
 
 .empty-placeholder {
   background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
+}
+
+.loading-overlay {
+  min-width: 430px;
+  min-height: 250px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
 }
 </style>

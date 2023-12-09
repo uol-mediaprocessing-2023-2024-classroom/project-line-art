@@ -95,8 +95,7 @@ export default {
           It fetches the high-resolution URL of the selected image and updates the selectedImage property. 
         */
         async updateSelected(selectedId, cldId) {
-
-            // Construct URL for fetching the high-resolution image
+             // Construct URL for fetching the high-resolution image
             const url = `https://cmp.photoprintit.com/api/photos/${selectedId}.org?size=original&errorImage=false&cldId=${cldId}&clientVersion=0.0.1-medienVerDemo`;
             const response = await fetch(url);
 
@@ -114,16 +113,24 @@ export default {
 
         /* This method retrieves a processed version of the selected image from the backend. */
         async processImage(selectedId, cldId) {
+            this.$refs.homePage.loading = true; // Aktiviere den Ladeeffekt
 
             const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
 
-            // Fetch the processed image
-            const response = await fetch(localUrl);
-            const imageBlob = await response.blob();
-            const processedImageUrl = URL.createObjectURL(imageBlob);
-
-            // Update the selected image with the URL of the processed image
-            this.processedImage.url = processedImageUrl;
+            try{
+                // Fetch the processed image
+                const response = await fetch(localUrl);
+                const imageBlob = await response.blob();
+                const processedImageUrl = URL.createObjectURL(imageBlob);
+                // Update the selected image with the URL of the processed image
+                this.processedImage.url = processedImageUrl;
+            } catch (error) {
+                // Handle error, z.B. zeige Fehlermeldung an
+                this.showError("Fehler beim Laden des Bildes.");
+                this.$refs.homePage.informationImage = " ";
+            } finally {
+                this.$refs.homePage.loading = false; // Deaktiviere den Ladeeffekt, unabhängig vom Erfolg/Fehler
+            }
         },
 
         /* This method resets the current gallery and selected image. */
