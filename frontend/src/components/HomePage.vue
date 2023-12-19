@@ -465,13 +465,16 @@ export default {
 }
 
 .loading-overlay {
+background-color: #F3F3F3;
   min-width: 430px;
-  min-height: 250px;
+  min-height: 290px;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 18px;
+  max-width: 430px;
+  max-height: 500px;
 }
 </style>
