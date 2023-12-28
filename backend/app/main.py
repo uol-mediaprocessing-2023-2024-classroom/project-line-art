@@ -63,6 +63,7 @@ async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks
     download_image(image_url, img_path)
     #process_image(img_path)
     process_image_crop(img_path)
+    process_image_contours(img_path)
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -133,6 +134,22 @@ def process_image_crop(img_path: str):
     #cv2.imwrite(img_path, processedImage_a*255.0)
     plt.imsave(img_path, processedImage_a)
     
+def process_image_contours(img_path: str):
+    processedImage = io.imread(img_path)
+
+    gray = cv2.cvtColor(processedImage, cv2.COLOR_BGR2GRAY)
+
+    _, binary = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+
+    contours, hierarchy = cv2.findContours(
+        binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+    drawing = np.zeros((gray.shape[0], gray.shape[1], 3), dtype=np.uint8)
+    CountersImg = cv2.drawContours(drawing, contours, -1, (255, 255, 0), 3)
+
+    # save to disk
+    plt.imsave(img_path, CountersImg)
+
    
 # Deletes the file at the specified path.
 def remove_file(path: str):
