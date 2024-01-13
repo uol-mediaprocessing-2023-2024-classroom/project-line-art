@@ -4,3 +4,5 @@ Backend/app/bib/*.jpg
 Backend/app/bib/*.gif
 ./node_modules
 /node_modules
+/dokumentary/runs/*
+/dokumentary/yolov8x-seg.pt
