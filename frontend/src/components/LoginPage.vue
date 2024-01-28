@@ -62,10 +62,10 @@
 
             if (response) {
                 this.handleLoginResponse(response);
+                this.mainPage();
             }
 
             this.awaitingLoginResponse = false;
-            this.mainPage();
         },
 
         // Helper method called by login(), logs out the user.
