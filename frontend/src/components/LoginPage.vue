@@ -5,7 +5,7 @@
             <h2>E-mail</h2>
             <input required  v-model="loginData.email" type="email" name="email" autocomplete="email" />
             <h2>Passwort:</h2>
-            <input required  v-model="loginData.password" type="password" name="password" autocomplete="password" /> 
+            <input required  v-model="loginData.password" type="password" name="password" autocomplete="password" @keyup.enter="login" /> 
             <v-btn @click="login" :disabled="awaitingLoginResponse" class="loginButton">
                 <v-progress-circular indeterminate color="grey lighten-5" v-if="awaitingLoginResponse"></v-progress-circular>
                 <div v-else>
