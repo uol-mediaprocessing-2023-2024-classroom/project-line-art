@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from PIL import Image, ImageFilter
 
-from segment_anything import SamPredictor, sam_model_registry
+from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 import torch
 from skimage import filters
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,7 +61,7 @@ sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 sam.to(device=device)
 
 predictor = SamPredictor(sam)
-
+mask_generator = SamAutomaticMaskGenerator(sam)
 
 # A simple endpoint to verify that the API is online.
 @app.get("/")
@@ -80,9 +80,9 @@ async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks
 
     download_image(image_url, img_path)
     remove_background(img_path)
-    #process_image(img_path)
-    #process_image_crop(img_path)
-    #process_image_contours(img_path)
+    get_segments(img_path)
+    #remove_background('segments_image.png')
+    get_lines_from_segmenst(img_path)
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -90,6 +90,33 @@ async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks
     # Send the processed image file as a response
     return FileResponse(img_path)
 
+def get_segments(img_path: str):
+    img = cv2.imread('new_img.png')
+    masks = mask_generator.generate(img)
+    anns = show_anns(masks)
+    plt.imsave(img_path, anns)
+    
+    temp = 255 * anns # Now scale by 255
+    segments = temp.astype(np.uint8)
+    cv2.imwrite('segments_image.png', segments)
+
+def get_lines_from_segmenst(img_path: str):
+    img = cv2.imread('segments_image.png')
+    # Setting All parameters 
+    t_lower = 100  # Lower Threshold
+    t_upper = 500  # Upper threshold 
+    aperture_size = 5  # Aperture size 
+    kernel = np.ones((4,4), np.uint8) 
+    
+    # Applying the Canny Edge filter 
+    # with Custom Aperture Size 
+    edges = cv2.Canny(img, t_lower, t_upper,  
+                    apertureSize=aperture_size) 
+    edges = cv2.dilate(edges, kernel)
+    edges = cv2.dilate(edges, kernel)
+    edges = cv2.erode(edges, kernel)
+    cv2.imwrite('edges_image.png', edges)
+    plt.imsave(img_path, edges)
 
 # Downloads an image from the specified URL and saves it to the given path.
 def download_image(image_url: str, img_path: str):
@@ -113,11 +140,11 @@ def remove_background(img_path: str):
 
 
     # Save the result as a PNG file
-    #cv2.imwrite('new_dog_img.png', new_image)
+    cv2.imwrite('new_img.png', new_image)
     new_image = new_image / 255.0
 
-
-    plt.imsave(img_path, new_image)
+    return new_image
+    #plt.imsave(img_path, new_image)
 
 
 def get_best_mask(img: Image):
@@ -176,9 +203,9 @@ def show_anns(anns):
     i[:,:,3] = 0
     for ann in sorted_anns:
         m = ann['segmentation']
-        color_mask = np.concatenate([np.random.random(3), [0.8]])
+        color_mask = np.concatenate([np.random.random(3), [0.99]])
         i[m] = color_mask
-    ax.imshow(i)
+    #ax.imshow(i)
     return i
 
 
