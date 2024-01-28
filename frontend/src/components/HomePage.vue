@@ -321,7 +321,12 @@ export default {
     display: flex;
     flex-direction: row ;
     padding: 1%;
-
+    border-radius: 10px;
+    color: black;
+    padding: 1%;
+    margin-top: 1%;
+    max-height: 600px;
+    overflow-y: auto;
 }
 .selectImageArea {
     display: flex;
@@ -384,9 +389,9 @@ export default {
     display: flex;
     flex-direction: column;
     
-    border-radius: 10px;
+    border-radius: 0,1%;
     color: black;
-    padding: 1%;
+    padding: 0,1%;
     margin-top: 1%;
     max-height: 600px;
     overflow-y: auto;
