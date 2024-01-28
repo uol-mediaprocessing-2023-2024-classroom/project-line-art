@@ -100,7 +100,7 @@ def get_segments(img_path: str):
     segments = temp.astype(np.uint8)
     cv2.imwrite('segments_image.png', segments)
 
-def get_lines_from_segmenst(img_path: str):
+def get_lines_from_segments(img_path: str):
     img = cv2.imread('segments_image.png')
     # Setting All parameters 
     t_lower = 100  # Lower Threshold
