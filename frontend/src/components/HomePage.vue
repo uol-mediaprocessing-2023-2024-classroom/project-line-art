@@ -79,10 +79,18 @@
   
         <div class="imageGalleryField">
             <div style="display: flex; flex-direction: row ;">
-                Images: 
+                <h2 text-align: center>
+                    Images
+                </h2>
                 <v-btn @click="loadImages(cldId)" variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
                     <svg-icon type="mdi" :path="path"></svg-icon>
                 </v-btn>
+                <v-btn @click="uploadImages" variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                    <svg-icon type="mdi" :path="path"></svg-icon>
+                </v-btn>
+                <button @click="attemptUpload" v-bind:class="{ disabled: !image }">
+                Upload
+                </button>
             </div>
            
             <div>
@@ -147,6 +155,21 @@ export default {
         //Switching sites
         switchSite() {
             this.$emit("switchSite");
+        },
+
+        attemptUpload() {
+            if (this.image){
+            FormDataPost('http://localhost:8000/user/picture', this.image)
+                .then(response=>{
+                if (response.data.success){
+                    this.image = '';
+                    console.log("Image uploaded successfully ✨");
+                }
+                })
+                .catch(err=>{
+                console.error(err);
+                });
+            }
         },
 
         // Helper method called by login(), logs out the user.
