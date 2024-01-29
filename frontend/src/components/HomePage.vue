@@ -73,6 +73,9 @@
                     </div>
                     <img v-else class="selectedImg" v-bind:src="processedImage.url" />
                 </div>
+                <v-btn @click="downloadProcessedImage" variant="text">
+                   Download Processed Image
+                </v-btn>
             </div>
 
         </div>
@@ -234,6 +237,11 @@ export default {
                 this.$emit("processImage", selectedId, this.cldId);
             }
         },
+
+        downloadProcessedImage(){
+            console.log("hey")
+            this.$emit('downloadProcessed')
+        }
     },
 
     computed: {
