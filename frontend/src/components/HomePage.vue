@@ -42,14 +42,26 @@
 
                 </div>
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
-                    Settings:
-                    <div class="selectSegmentOption">
-                        <v-radio-group>
-                            <v-radio label="No colored Segments" value="no Segments" true-value></v-radio>
-                            <v-radio label="Image-based color" value="Image-based color" ></v-radio>
-                            <v-radio label="Select Color" value="Select Color"></v-radio>
-                            <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
-                        </v-radio-group>
+                    <div>
+                        <v-btn class="basicButton" @click="showContours">Konturen</v-btn>
+                        <v-btn class="basicButton" @click="showSegments">Segmente</v-btn>
+
+                        <div v-if="currentContent === 1" class="selectSegmentOption">
+                            <v-radio-group v-model="currentOption">
+                                <v-radio label="No colored Contours" value="No Color" true-value></v-radio>
+                                <v-radio label="Image-based contours" value="Image-based" ></v-radio>
+                                <v-radio label="Select Color" value="Select Color"></v-radio>
+                                <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                            </v-radio-group>
+                        </div>
+                        <div v-else class="selectSegmentOption">
+                            <v-radio-group v-model="currentOption">
+                                <v-radio label="No colored Segments" value="No Color" true-value></v-radio>
+                                <v-radio label="Image-based color" value="Image-based"></v-radio>
+                                <v-radio label="Select Color" value="Select Color"></v-radio>
+                                <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                            </v-radio-group>
+                        </div>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
                         Process
@@ -128,6 +140,10 @@ export default {
                 avgColor: ""
             },
 
+            currentContent: 1,
+            currentOption: 'No Color',
+            selectedColor: "#ff0000",
+
             // UI related
             loginButtonText: "LOGIN",
             errorMessage: null,
@@ -147,6 +163,13 @@ export default {
         //Switching sites
         switchSite() {
             this.$emit("switchSite");
+        },
+
+        showSegments() {
+            this.currentContent = 2;
+        },
+        showContours() {
+            this.currentContent = 1;
         },
 
         // Helper method called by login(), logs out the user.
@@ -231,7 +254,7 @@ export default {
                 return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
             } else{
                 // Fortfahren mit der Bildverarbeitung
-                this.$emit("processImage", selectedId, this.cldId);
+                this.$emit("processImage", selectedId, this.cldId, this.currentContent, this.currentOption, this.selectedColor);
             }
         },
     },
@@ -411,7 +434,7 @@ export default {
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
-    width: 150px;
+    width: 130px;
     margin: 3px;
     align-self: center;
 }
