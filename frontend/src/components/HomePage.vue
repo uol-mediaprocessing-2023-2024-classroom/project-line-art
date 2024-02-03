@@ -43,9 +43,10 @@
                 </div>
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
                     <div>
-                        <v-btn class="basicButton" @click="showContours">Konturen</v-btn>
-                        <v-btn class="basicButton" @click="showSegments">Segmente</v-btn>
-
+                        <div class="button-container">
+                            <v-btn class="basicButton" @click="showContours">Konturen</v-btn>
+                            <v-btn class="basicButton" @click="showSegments">Segmente</v-btn>
+                        </div>
                         <div v-if="currentContent === 1" class="selectSegmentOption">
                             <v-radio-group v-model="currentOption">
                                 <v-radio label="No colored Contours" value="No Color" true-value></v-radio>
@@ -434,7 +435,7 @@ export default {
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
-    width: 130px;
+    width: 120px;
     margin: 3px;
     align-self: center;
 }
@@ -490,6 +491,12 @@ export default {
 
 .empty-placeholder {
   background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%; /* Sorgt dafür, dass die Buttons die gesamte Breite nutzen */
 }
 
 .loading-overlay {
