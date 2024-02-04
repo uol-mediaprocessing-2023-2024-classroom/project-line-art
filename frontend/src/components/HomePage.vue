@@ -49,17 +49,17 @@
                         </div>
                         <div v-if="currentContent === 1" class="selectSegmentOption">
                             <v-radio-group v-model="currentOption">
-                                <v-radio label="No colored Contours" value="No Color" true-value></v-radio>
-                                <v-radio label="Image-based contours" value="Image-based" ></v-radio>
-                                <v-radio label="Select Color" value="Select Color"></v-radio>
+                                <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
+                                <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
+                                <v-radio label="Select Color" value="SelectColor"></v-radio>
                                 <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
                             </v-radio-group>
                         </div>
                         <div v-else class="selectSegmentOption">
                             <v-radio-group v-model="currentOption">
-                                <v-radio label="No colored Segments" value="No Color" true-value></v-radio>
-                                <v-radio label="Image-based color" value="Image-based"></v-radio>
-                                <v-radio label="Select Color" value="Select Color"></v-radio>
+                                <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
+                                <v-radio label="Image-based color" value="Imagebased"></v-radio>
+                                <v-radio label="Select Color" value="SelectColor"></v-radio>
                                 <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
                             </v-radio-group>
                         </div>
@@ -142,8 +142,8 @@ export default {
             },
 
             currentContent: 1,
-            currentOption: 'No Color',
-            selectedColor: "#ff0000",
+            currentOption: 'NoColor',
+            selectedColor: "ff0000",
 
             // UI related
             loginButtonText: "LOGIN",
@@ -171,6 +171,10 @@ export default {
         },
         showContours() {
             this.currentContent = 1;
+        },
+
+        getSelectedColorWithoutHash() {
+            return this.selectedColor.replace('#', '');
         },
 
         // Helper method called by login(), logs out the user.
@@ -255,7 +259,7 @@ export default {
                 return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
             } else{
                 // Fortfahren mit der Bildverarbeitung
-                this.$emit("processImage", selectedId, this.cldId, this.currentContent, this.currentOption, this.selectedColor);
+                this.$emit("processImage", selectedId, this.cldId, this.currentContent, this.currentOption, this.getSelectedColorWithoutHash());
             }
         },
     },
