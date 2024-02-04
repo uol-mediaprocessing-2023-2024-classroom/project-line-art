@@ -60,8 +60,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#sam_checkpoint = "/Users/talea/Documents/Master/Medienverarbeitung Projekt/project-line-art/backend/app/sam_vit_h_4b8939.pth"
-sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth"
+sam_checkpoint = "/Users/talea/Documents/Master/Medienverarbeitung Projekt/project-line-art/backend/app/sam_vit_h_4b8939.pth"
+#sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -77,7 +77,6 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 def home():
     return {"Test": "Online"}
 
-
 @app.get("/process-image/{cldId}/{imgId}/{currentContent}/{currentOption}/{selectedColor}")
 async def processImage(cldId: str, imgId: str, currentContent: str, currentOption: str, selectedColor: str, background_tasks: BackgroundTasks):
     """
@@ -87,11 +86,30 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
     img_path = f"app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
-    download_image(image_url, img_path)
-    remove_background(img_path)
-    get_segments(img_path)
-    #remove_background('segments_image.png')
-    get_lines_from_segments(img_path)
+    if currentContent == 1 and currentOption == "NoColor":
+        download_image(image_url, img_path)
+        remove_background(img_path)
+        get_segments(img_path)
+        newColor = "#" + selectedColor
+        rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
+        #remove_background('segments_image.png')
+        get_lines_from_segments(img_path, rgb_color)
+        print('test')
+    elif currentContent == 1 and currentOption == "Imagebased":
+        download_image(image_url, img_path)
+        remove_background(img_path)
+        get_segments(img_path)
+        mainColor = get_main_color(img_path)
+        #remove_background('segments_image.png')
+        get_lines_from_segments(img_path, mainColor)
+    elif currentContent == 1 and currentOption == "SelectColor":
+        download_image(image_url, img_path)
+        remove_background(img_path)
+        get_segments(img_path)
+        newColor = "#" + selectedColor
+        rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
+        #remove_background('segments_image.png')
+        get_lines_from_segments(img_path, rgb_color)
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -109,7 +127,7 @@ def get_segments(img_path: str):
     segments = temp.astype(np.uint8)
     cv2.imwrite('segments_image.png', segments)
 
-def get_lines_from_segments(img_path: str):
+def get_lines_from_segments(img_path: str, selectedColor: str):
     img = cv2.imread('segments_image.png')
     gray = cv2.imread('new_img.png')
     # Setting All parameters 
@@ -118,6 +136,7 @@ def get_lines_from_segments(img_path: str):
     aperture_size = 5  # Aperture size 
     kernel = np.ones((4,4), np.uint8) 
     MASK_COLOR = (1.0,1.0,1.0)
+    NEW_LINE_COLOR = selectedColor  # Set the desired color for lines
     
     # Applying the Canny Edge filter 
     # with Custom Aperture Size 
@@ -141,7 +160,7 @@ def get_lines_from_segments(img_path: str):
     mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
     CountersImg         = CountersImg.astype('float32') / 255.0                 #  for easy blending
 
-    masked = (mask_stack * CountersImg) + ((1-mask_stack) * MASK_COLOR) # Blend
+    masked = (mask_stack * CountersImg * NEW_LINE_COLOR) + ((1-mask_stack) * MASK_COLOR) # Blend
     masked = (masked * 255).astype('uint8')  
     
     cv2.imwrite('edges_image.png', masked)
@@ -176,6 +195,24 @@ def remove_background(img_path: str):
 
     return new_image
     #plt.imsave(img_path, new_image)
+
+def get_main_color(image_path):
+     # Bild öffnen
+    image = io.imread(image_path)
+
+    # Bild in ein NumPy-Array konvertieren
+    image_array = np.array(image)
+
+    # Die Form des Arrays ändern, um die Pixel als Flachliste zu erhalten
+    flattened_image_array = image_array.reshape((-1, 3))
+
+    # Die Hauptfarbe finden, indem der Durchschnitt der RGB-Werte berechnet wird
+    main_color = np.mean(flattened_image_array, axis=0)
+    
+    # Konvertiere die Hauptfarbe in eine Liste von Ganzzahlen
+    main_color_list = main_color.astype(int).tolist()
+
+    return main_color_list
 
 
 def get_best_mask(img: Image):
@@ -245,6 +282,7 @@ def process_image(img_path: str):
     processedImage = Image.open(img_path)
     processedImage = processedImage.filter(ImageFilter.BoxBlur(10))
     processedImage.save(img_path)
+    cv2.imwrite('processedImage.png', processedImage)
 
 def process_image_crop(img_path: str):
     processedImage = io.imread(img_path)
