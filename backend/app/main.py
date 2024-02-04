@@ -27,7 +27,7 @@ CANNY_THRESH_1 = 10
 CANNY_THRESH_2 = 200
 MASK_DILATE_ITER = 10
 MASK_ERODE_ITER = 10
-MASK_COLOR = (0.0,0.0,1.0) # In BGR format
+MASK_COLOR = (1.0,1.0,1.0)
 
 app = FastAPI()
 
@@ -86,26 +86,21 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
     img_path = f"app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
-    if currentContent == 1 and currentOption == "NoColor":
-        download_image(image_url, img_path)
-        remove_background(img_path)
-        get_segments(img_path)
+    download_image(image_url, img_path)
+    remove_background(img_path)
+    get_segments(img_path)
+    
+    if currentContent == "1" and currentOption == "NoColor":
         newColor = "#" + selectedColor
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
         print('test')
-    elif currentContent == 1 and currentOption == "Imagebased":
-        download_image(image_url, img_path)
-        remove_background(img_path)
-        get_segments(img_path)
+    elif currentContent == "1" and currentOption == "Imagebased":
         mainColor = get_main_color(img_path)
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, mainColor)
-    elif currentContent == 1 and currentOption == "SelectColor":
-        download_image(image_url, img_path)
-        remove_background(img_path)
-        get_segments(img_path)
+    elif currentContent == "1" and currentOption == "SelectColor":
         newColor = "#" + selectedColor
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
@@ -116,6 +111,7 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
 
     # Send the processed image file as a response
     return FileResponse(img_path)
+
 
 def get_segments(img_path: str):
     img = cv2.imread('new_img.png')
@@ -135,7 +131,6 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     t_upper = 500  # Upper threshold 
     aperture_size = 5  # Aperture size 
     kernel = np.ones((4,4), np.uint8) 
-    MASK_COLOR = (1.0,1.0,1.0)
     NEW_LINE_COLOR = selectedColor  # Set the desired color for lines
     
     # Applying the Canny Edge filter 
@@ -146,26 +141,17 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     edges = cv2.dilate(edges, kernel)
     edges = cv2.erode(edges, kernel)
     
-    contours, hierarchy = cv2.findContours(
-        edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-
-    drawing = np.zeros((gray.shape[0], gray.shape[1], 3), dtype=np.uint8)
-    CountersImg = cv2.drawContours(drawing, contours, -1, (212, 44, 213), 1)
-    
     # Stack arrays in the depth sequence (along the third axis).
     mask_stack = np.dstack([edges]*3)    # Create 3-channel alpha mask
 
     #-- Blend masked img into MASK_COLOR background --------------------------------------
     mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
-    CountersImg         = CountersImg.astype('float32') / 255.0                 #  for easy blending
+    img         = img.astype('float32') / 255.0                 #  for easy blending
 
-    masked = (mask_stack * CountersImg * NEW_LINE_COLOR) + ((1-mask_stack) * MASK_COLOR) # Blend
-    masked = (masked * 255).astype('uint8')  
+    masked = (mask_stack * NEW_LINE_COLOR) + ((1-mask_stack) * MASK_COLOR) # Blend
+    masked = (masked * 255).astype('uint8') 
     
     cv2.imwrite('edges_image.png', masked)
-    cv2.imwrite('edges_image.png', drawing)
-    cv2.imwrite('edges_image.png', CountersImg)
     cv2.imwrite('edges.png', edges)
     plt.imsave(img_path, masked)
 
