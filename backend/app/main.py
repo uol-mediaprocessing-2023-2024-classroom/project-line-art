@@ -60,8 +60,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sam_checkpoint = "/Users/talea/Documents/Master/Medienverarbeitung Projekt/project-line-art/backend/app/sam_vit_h_4b8939.pth"
-#sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth"
+sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
