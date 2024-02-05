@@ -86,6 +86,7 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
     img_path = f"app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
+    mainColor = get_main_color(img_path)
     download_image(image_url, img_path)
     remove_background(img_path)
     get_segments(img_path)
@@ -95,9 +96,7 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
-        print('test')
     elif currentContent == "1" and currentOption == "Imagebased":
-        mainColor = get_main_color(img_path)
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, mainColor)
     elif currentContent == "1" and currentOption == "SelectColor":
@@ -132,6 +131,7 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     aperture_size = 5  # Aperture size 
     kernel = np.ones((4,4), np.uint8) 
     NEW_LINE_COLOR = selectedColor  # Set the desired color for lines
+    NEW_LINE_COLOR_normalized = [val / 255.0 for val in NEW_LINE_COLOR]
     
     # Applying the Canny Edge filter 
     # with Custom Aperture Size 
@@ -148,8 +148,7 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
     img         = img.astype('float32') / 255.0                 #  for easy blending
 
-    masked = (mask_stack * NEW_LINE_COLOR) + ((1-mask_stack) * MASK_COLOR) # Blend
-    masked = (masked * 255).astype('uint8') 
+    masked = (mask_stack * NEW_LINE_COLOR_normalized) + ((1-mask_stack) * MASK_COLOR) # Blend 
     
     cv2.imwrite('edges_image.png', masked)
     cv2.imwrite('edges.png', edges)

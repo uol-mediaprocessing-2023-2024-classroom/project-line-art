@@ -5,3 +5,6 @@ Backend/app/bib/*.gif
 ./node_modules
 /node_modules
 dokumentary/sam_vit_h_4b8939.pth
+package-lock.json
+package.json
+node_modules
