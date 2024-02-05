@@ -112,10 +112,10 @@ export default {
         },
 
         /* This method retrieves a processed version of the selected image from the backend. */
-        async processImage(selectedId, cldId) {
+        async processImage(selectedId, cldId, currentContent, currentOption, selectedColor) {
             this.$refs.homePage.loading = true; // Aktiviere den Ladeeffekt
 
-            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
+            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}/${currentContent}/${currentOption}/${selectedColor}`;
 
             try{
                 // Fetch the processed image
