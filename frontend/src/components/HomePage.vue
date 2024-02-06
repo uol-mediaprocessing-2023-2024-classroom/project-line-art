@@ -99,6 +99,8 @@
                 <v-btn @click="loadImages(cldId)" variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
                     <svg-icon type="mdi" :path="path"></svg-icon>
                 </v-btn>
+                <input type="file" @change="handleFileSelect" multiple style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit"/>
+                <v-btn @click="uploadImages">Bilder hochladen</v-btn>
             </div>
            
             <div>
@@ -153,6 +155,7 @@ export default {
             errorMessage: null,
             informationImage: null,
             loading: false, // Ladeeffekt aktivieren/deaktivieren
+            selectedFiles: [], // Hier werden die ausgewählten Dateien gespeichert
         };
     },
 
@@ -241,6 +244,20 @@ export default {
         // Emit a loadImages event.
         loadImages() {
             this.$emit("loadImages", this.cldId);
+        },
+
+        handleFileSelect(event) {
+            const input = event.target;
+            if (input.files && input.files.length > 0) {
+                // Setze die ausgewählten Dateien im Datenmodell
+                this.selectedFiles = Array.from(input.files);
+            }
+        },
+
+        // Emit a loadImages event.
+        async uploadImages() {
+            await this.$emit("uploadImages", this.cldId, this.selectedFiles);
+            this.selectedFiles = [];
         },
 
         // Emit a updateSelected event with the ID of the selected image.

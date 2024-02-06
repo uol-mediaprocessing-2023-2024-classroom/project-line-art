@@ -4,7 +4,7 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" @downloadProcessed='downloadProcessed' ref="homePage"/>
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" @downloadProcessed='downloadProcessed' @uploadImages='uploadImages' ref="homePage"/>
             <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
@@ -87,6 +87,43 @@ export default {
                     type: photo.mimeType,
                     url: imgUrl
                 });
+            }
+        },
+
+        async uploadImages(cldId, files) {
+            const headers = {
+                cldId: cldId,
+                clientVersion: "0.0.1-medienVerDemo",
+            };
+
+            // Iteriere über hochgeladene Dateien
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    // Beispiel für einen Upload mit fetch
+                    const response = await fetch('https://cmp.photoprintit.com/api/photos/upload', {
+                        method: 'POST',
+                        headers: headers,
+                        body: formData,
+                    });
+
+                    // Die API gibt möglicherweise eine Antwort mit Informationen zum hochgeladenen Bild zurück
+                    const uploadedImageData = await response.json();
+
+                    // Füge das hochgeladene Bild zur aktuellen Galerie hinzu
+                    this.currentGallery.push({
+                        id: uploadedImageData.id,
+                        name: uploadedImageData.name,
+                        avgColor: uploadedImageData.avgHexColor,
+                        timestamp: uploadedImageData.timestamp,
+                        type: uploadedImageData.mimeType,
+                        url: uploadedImageData.url,
+                    });
+                } catch (error) {
+                    console.error('Fehler beim Hochladen des Bildes:', error);
+                }
             }
         },
 
