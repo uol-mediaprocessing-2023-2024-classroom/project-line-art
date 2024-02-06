@@ -60,6 +60,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
