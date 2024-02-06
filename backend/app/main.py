@@ -52,7 +52,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth"
+#/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth
+sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth" #os.path.abspath("backend/app/sam_vit_h_4b8939.pth")
 model_type = "vit_h"
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -82,7 +83,8 @@ async def processImage(cldId: str, imgId: str, background_tasks: BackgroundTasks
     remove_background(img_path)
     get_segments(img_path)
     #remove_background('segments_image.png')
-    get_lines_from_segmenst(img_path)
+    get_lines_from_segments(img_path)
+
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -115,7 +117,23 @@ def get_lines_from_segments(img_path: str):
     edges = cv2.dilate(edges, kernel)
     edges = cv2.dilate(edges, kernel)
     edges = cv2.erode(edges, kernel)
-    cv2.imwrite('edges_image.png', edges)
+
+    # Stack arrays in the depth sequence (along the third axis).
+    mask_stack = np.dstack([edges]*3)    # Create 3-channel alpha mask
+
+    #-- Blend masked img into MASK_COLOR background --------------------------------------
+    mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
+    img         = img.astype('float32') / 255.0                 #  for easy blending
+
+    masked = (mask_stack * img) + ((1-mask_stack) * MASK_COLOR) # Blend
+    masked = (masked * 255).astype('uint8')
+
+    c_red, c_green, c_blue = cv2.split(img)
+
+    # merge with mask got on one of a previous steps
+    processedImage_a = cv2.merge((c_red, c_green, c_blue, edges.astype('float32') / 255.0))
+
+    cv2.imwrite('edges_image.png', processedImage_a)
     plt.imsave(img_path, edges)
 
 # Downloads an image from the specified URL and saves it to the given path.
