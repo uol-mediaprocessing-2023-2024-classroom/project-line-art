@@ -53,7 +53,7 @@ app.add_middleware(
 )
 
 #/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth
-sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/sam_vit_h_4b8939.pth" #os.path.abspath("backend/app/sam_vit_h_4b8939.pth")
+sam_checkpoint = "/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/models/sam_vit_h_4b8939.pth" #os.path.abspath("backend/app/sam_vit_h_4b8939.pth")
 model_type = "vit_h"
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
