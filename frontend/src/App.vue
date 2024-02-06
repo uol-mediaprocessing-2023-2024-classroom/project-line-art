@@ -4,7 +4,7 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" ref="homePage"/>
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" @downloadProcessed='downloadProcessed' ref="homePage"/>
             <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
@@ -112,10 +112,10 @@ export default {
         },
 
         /* This method retrieves a processed version of the selected image from the backend. */
-        async processImage(selectedId, cldId) {
+        async processImage(selectedId, cldId, currentContent, currentOption, selectedColor) {
             this.$refs.homePage.loading = true; // Aktiviere den Ladeeffekt
 
-            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
+            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}/${currentContent}/${currentOption}/${selectedColor}`;
 
             try{
                 // Fetch the processed image
@@ -131,6 +131,28 @@ export default {
             } finally {
                 this.$refs.homePage.loading = false; // Deaktiviere den Ladeeffekt, unabhängig vom Erfolg/Fehler
             }
+        },
+
+        async downloadProcessed() {
+            const imageUrl = this.processedImage.url;
+
+            // Use the fetch API to download the image
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Create a link element
+                    const link = document.createElement('a');
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    link.href = blobUrl;
+                    link.download = `processed_image_${this.processedImage.id}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(blobUrl);
+                })
+                .catch(error => {
+                    console.error('Error downloading processedImage:', error);
+                });
         },
 
         /* This method resets the current gallery and selected image. */

@@ -42,14 +42,27 @@
 
                 </div>
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
-                    Settings:
-                    <div class="selectSegmentOption">
-                        <v-radio-group>
-                            <v-radio label="No colored Segments" value="no Segments" true-value></v-radio>
-                            <v-radio label="Image-based color" value="Image-based color" ></v-radio>
-                            <v-radio label="Select Color" value="Select Color"></v-radio>
-                            <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
-                        </v-radio-group>
+                    <div>
+                        <div class="button-container">
+                            <v-btn class="basicButton" @click="showContours">Konturen</v-btn>
+                            <v-btn class="basicButton" @click="showSegments">Segmente</v-btn>
+                        </div>
+                        <div v-if="currentContent === 1" class="selectSegmentOption">
+                            <v-radio-group v-model="currentOption">
+                                <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
+                                <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
+                                <v-radio label="Select Color" value="SelectColor"></v-radio>
+                                <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                            </v-radio-group>
+                        </div>
+                        <div v-else class="selectSegmentOption">
+                            <v-radio-group v-model="currentOption">
+                                <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
+                                <v-radio label="Image-based color" value="Imagebased"></v-radio>
+                                <v-radio label="Select Color" value="SelectColor"></v-radio>
+                                <v-color-picker v-model="selectedColor" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                            </v-radio-group>
+                        </div>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
                         Process
@@ -73,6 +86,9 @@
                     </div>
                     <img v-else class="selectedImg" v-bind:src="processedImage.url" />
                 </div>
+                <v-btn @click="downloadProcessedImage" variant="text">
+                   Download Processed Image
+                </v-btn>
             </div>
 
         </div>
@@ -128,6 +144,10 @@ export default {
                 avgColor: ""
             },
 
+            currentContent: 1,
+            currentOption: 'NoColor',
+            selectedColor: "ff0000",
+
             // UI related
             loginButtonText: "LOGIN",
             errorMessage: null,
@@ -147,6 +167,17 @@ export default {
         //Switching sites
         switchSite() {
             this.$emit("switchSite");
+        },
+
+        showSegments() {
+            this.currentContent = 2;
+        },
+        showContours() {
+            this.currentContent = 1;
+        },
+
+        getSelectedColorWithoutHash() {
+            return this.selectedColor.replace('#', '');
         },
 
         // Helper method called by login(), logs out the user.
@@ -231,9 +262,14 @@ export default {
                 return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
             } else{
                 // Fortfahren mit der Bildverarbeitung
-                this.$emit("processImage", selectedId, this.cldId);
+                this.$emit("processImage", selectedId, this.cldId, this.currentContent, this.currentOption, this.getSelectedColorWithoutHash());
             }
         },
+
+        downloadProcessedImage(){
+            console.log("hey")
+            this.$emit('downloadProcessed')
+        }
     },
 
     computed: {
@@ -411,7 +447,7 @@ export default {
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
-    width: 150px;
+    width: 120px;
     margin: 3px;
     align-self: center;
 }
@@ -467,6 +503,12 @@ export default {
 
 .empty-placeholder {
   background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%; /* Sorgt dafür, dass die Buttons die gesamte Breite nutzen */
 }
 
 .loading-overlay {
