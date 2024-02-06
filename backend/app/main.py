@@ -76,8 +76,8 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 def home():
     return {"Test": "Online"}
 
-@app.get("/process-image/{cldId}/{imgId}/{currentContent}/{currentOption}/{selectedColor}")
-async def processImage(cldId: str, imgId: str, currentContent: str, currentOption: str, selectedColor: str, background_tasks: BackgroundTasks):
+@app.get("/process-image/{cldId}/{imgId}/{currentOptionContours}/{currentOptionSegments}/{selectedColorContours}/{selectedColorSegments}")
+async def processImage(cldId: str, imgId: str, currentOptionContours: str, currentOptionSegments: str, selectedColorContours: str, selectedColorSegments: str, background_tasks: BackgroundTasks):
     """
     Endpoint to retrieve a processed version of an image.
     The image is fetched from a constructed URL and then processed.
@@ -90,16 +90,16 @@ async def processImage(cldId: str, imgId: str, currentContent: str, currentOptio
     remove_background(img_path)
     get_segments(img_path)
     
-    if currentContent == "1" and currentOption == "NoColor":
-        newColor = "#" + selectedColor
+    if currentOptionContours == "NoColor":
+        newColor = "#" + selectedColorContours
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
-    elif currentContent == "1" and currentOption == "Imagebased":
+    elif currentOptionContours == "Imagebased":
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, mainColor)
-    elif currentContent == "1" and currentOption == "SelectColor":
-        newColor = "#" + selectedColor
+    elif currentOptionContours == "SelectColor":
+        newColor = "#" + selectedColorContours
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
