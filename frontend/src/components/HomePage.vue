@@ -539,7 +539,7 @@ body {
 
 .tab{
     width: 100%; 
-    max-width: 300px;
+    max-width: 250px;
     align-items: center;
     border-radius: 10px;
     border: 1px  solid #e3e3e3;
