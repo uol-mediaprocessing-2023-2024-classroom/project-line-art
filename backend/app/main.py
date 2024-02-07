@@ -93,6 +93,7 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     download_image(image_url, img_path)
     remove_background(img_path)
     masks = get_segments(img_path)
+
     
     if currentOptionContours == "NoColor":
         newColor = "#" + selectedColorContours
