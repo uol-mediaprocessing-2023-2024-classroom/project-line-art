@@ -21,6 +21,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from numpy import asarray
 from PIL import Image, ImageOps
 
+import mediapipe as mp
+
 #== Parameters =======================================================================
 BLUR = 21
 CANNY_THRESH_1 = 10
@@ -61,6 +63,7 @@ app.add_middleware(
 )
 
 
+
 sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
@@ -89,7 +92,7 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     mainColor = get_main_color(img_path)
     download_image(image_url, img_path)
     remove_background(img_path)
-    get_segments(img_path)
+    masks = get_segments(img_path)
     
     if currentOptionContours == "NoColor":
         newColor = "#" + selectedColorContours
@@ -104,6 +107,7 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
+
 
     # Schedule the image file to be deleted after the response is sent
     background_tasks.add_task(remove_file, img_path)
@@ -121,6 +125,7 @@ def get_segments(img_path: str):
     temp = 255 * anns # Now scale by 255
     segments = temp.astype(np.uint8)
     cv2.imwrite('segments_image.png', segments)
+    return masks
 
 def get_lines_from_segments(img_path: str, selectedColor: str):
     img = cv2.imread('segments_image.png')
@@ -161,7 +166,7 @@ def download_image(image_url: str, img_path: str):
 def remove_background(img_path: str):
     img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
 
-    best_mask = get_best_mask(img)
+    best_mask = get_best_mask(img_path, img)
 
     # Assuming 'image' is your original image and 'segmentation_mask' is the mask image
     binary_mask = np.where(best_mask > 0.5, 1, 0)
@@ -200,14 +205,14 @@ def get_main_color(image_path):
     return main_color_list
 
 
-def get_best_mask(img: Image):
+def get_best_mask(img_path: str, img: Image):
     array_image = np.asarray(img)
 
     predictor = SamPredictor(sam)
     predictor.set_image(array_image)
 
-    input_point = np.array([[600, 400], [525, 600], [425, 600]])
-    input_label = np.array([1, 1, 0])
+    input_point = get_inpupt_points(img_path, img) 
+    input_label = np.array([1, 1, 1])
 
     masks, scores, logits = predictor.predict(
     multimask_output=True,
@@ -224,7 +229,46 @@ def get_best_mask(img: Image):
             best_mask = mask
 
     return best_mask
-            
+
+def get_inpupt_points(img_path: str, img: Image):
+    BaseOptions = mp.tasks.BaseOptions
+    PoseLandmarker = mp.tasks.vision.PoseLandmarker
+    PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
+    VisionRunningMode = mp.tasks.vision.RunningMode
+
+    model_path = './backend/app/models/pose_landmarker_lite.task'
+
+    options = PoseLandmarkerOptions(
+        base_options=BaseOptions(model_asset_path=model_path),
+        running_mode=VisionRunningMode.IMAGE)
+
+    with PoseLandmarker.create_from_options(options) as landmarker:
+        # The landmarker is initialized. Use it here.
+        # Load the input image from an image file.
+        mp_image = mp.Image.create_from_file('pictures/woman.jpg') 
+        print(mp_image.width) 
+        # Perform pose landmarking on the provided single image.
+        # The pose landmarker must be created with the image mode.
+        pose_landmarker_result = landmarker.detect(mp_image)          
+
+    width, height = img.size 
+
+    nose = pose_landmarker_result.pose_landmarks[0][0]
+    nose_x = nose.x * width
+    nose_y = nose.y * height
+
+    shoulder = pose_landmarker_result.pose_landmarks[0][12]
+    shoulder_x = shoulder.x * width
+    shoulder_y = shoulder.y * height
+
+    hip = pose_landmarker_result.pose_landmarks[0][23]
+    hip_x =hip.x * width
+    hip_y = hip.y * height
+
+    input_points = np.array([[nose_x, nose_y], [shoulder_x,shoulder_y], [hip_x, hip_y]])
+    return input_points
+
+
 def show_mask(mask, ax, random_color=False):
     if random_color:
         color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
