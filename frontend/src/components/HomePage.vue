@@ -41,27 +41,30 @@
                 <div class="subHeader">
 
                 </div>
+            
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
-                    <div>
-                        <div class="button-container">
-                            <v-btn class="basicButton" @click="showContours">Konturen</v-btn>
-                            <v-btn class="basicButton" @click="showSegments">Segmente</v-btn>
+                    <div class="tab">
+                        <div class="tab-menu">
+                            <span class="tab-menu-item" :class="{ active: tabs === 'tab1'}"  @click="tabs='tab1'">Contours</span>
+                            <span class="tab-menu-item" :class="{ active: tabs === 'tab2'}" @click="tabs='tab2'">Segments</span>
                         </div>
-                        <div v-if="currentContent === 1" class="selectSegmentOption">
-                            <v-radio-group v-model="currentOptionContours">
-                                <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
-                                <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
-                                <v-radio label="Select Color" value="SelectColor"></v-radio>
-                                <v-color-picker v-model="selectedColorContours" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
-                            </v-radio-group>
-                        </div>
-                        <div v-else class="selectSegmentOption">
-                            <v-radio-group v-model="currentOptionSegments">
-                                <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
-                                <v-radio label="Image-based color" value="Imagebased"></v-radio>
-                                <v-radio label="Select Color" value="SelectColor"></v-radio>
-                                <v-color-picker v-model="selectedColorSegments" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
-                            </v-radio-group>
+                        <div class="content">
+                            <div class="content-item" :class="{ active: tabs === 'tab1'}">
+                                <v-radio-group v-model="currentOptionContours">
+                                    <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
+                                    <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
+                                    <v-radio label="Select Color" value="SelectColor"></v-radio>
+                                    <v-color-picker v-model="selectedColorContours" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                                </v-radio-group>
+                            </div>
+                            <div class="content-item" :class="{ active: tabs === 'tab2'}">
+                                <v-radio-group v-model="currentOptionSegments">
+                                    <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
+                                    <v-radio label="Image-based color" value="Imagebased"></v-radio>
+                                    <v-radio label="Select Color" value="SelectColor"></v-radio>
+                                    <v-color-picker v-model="selectedColorSegments" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                                </v-radio-group>
+                            </div>
                         </div>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
@@ -144,11 +147,12 @@ export default {
                 avgColor: ""
             },
 
-            currentContent: 1,
             currentOptionContours: 'NoColor',
             currentOptionSegments: 'NoColor',
             selectedColorContours: "#FF0000FF",
             selectedColorSegments: "#FF0000FF",
+
+            tabs: 'tab1',
 
             // UI related
             loginButtonText: "LOGIN",
@@ -169,13 +173,6 @@ export default {
         //Switching sites
         switchSite() {
             this.$emit("switchSite");
-        },
-
-        showSegments() {
-            this.currentContent = 2;
-        },
-        showContours() {
-            this.currentContent = 1;
         },
 
         getSelectedColorWithoutHashContours() {
@@ -382,6 +379,7 @@ export default {
     flex-direction: column;
     align-items: center;
     margin-left: 10px;
+    margin-right: 10px;
     width: 400px;
     height: 100%;
     flex-grow: 1;
@@ -412,7 +410,7 @@ export default {
 }
 
 .subHeader {
-    min-height: 50px;
+    min-height: 10px;
     height: 10%;
     padding-bottom: 2%;
     margin-bottom: 1%;
@@ -529,5 +527,72 @@ background-color: #F3F3F3;
   font-size: 18px;
   max-width: 430px;
   max-height: 500px;
+}
+
+body {
+    display:flex;
+    align-items: border-box;
+    justify-content: center;
+    padding: 30px;
+    background-color: #f6f8ff;
+}
+
+.tab{
+    width: 100%; 
+    max-width: 300px;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px  solid #e3e3e3;
+    font-family: "Roboto", sans-serif;
+    background-color: white;
+    overflow: hidden;
+}
+.tab-menu{
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #ddd;
+}
+.tab-menu-item{
+    flex: 1;
+    padding:16px;
+    font-size: 12px;
+    font-weight: 300;
+    color: #666;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-align: center;
+    box-shadow: 0 2px 0 transparent;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tab-menu-item.active{
+    background: #f5f5f5;
+    color: #000;
+    box-shadow: 0 2px 0 #000;
+}
+
+.content{
+    padding: 10px 32px;
+background-color: #fefefe;
+}
+
+.content-item{
+    height: 0;
+    overflow: hidden;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(-20px);
+    visibility: hidden;
+    transition: all 1s ease;
+}
+
+.content-item.active{
+    height: auto;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
 }
 </style>
