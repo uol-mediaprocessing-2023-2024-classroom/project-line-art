@@ -75,13 +75,6 @@ sam.to(device=device)
 predictor = SamPredictor(sam)
 mask_generator = SamAutomaticMaskGenerator(sam)
 
-
-class Settings(BaseModel):
-    currentOptionContours: str
-    currentOptionSegments: str 
-    selectedColorContours: str
-    selectedColorSegments: str
-
 # A simple endpoint to verify that the API is online.
 @app.get("/")
 def home():
