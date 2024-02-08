@@ -79,7 +79,7 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     Endpoint to retrieve a processed version of an image.
     The image is fetched from a constructed URL and then processed.
     """
-    img_path = f"./app/bib/{imgId}.jpg"
+    img_path = f"app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
     mainColor = get_main_color(img_path)
@@ -222,7 +222,7 @@ def get_best_mask(img_path: str, img: Image):
     predictor = SamPredictor(sam)
     predictor.set_image(array_image)
 
-    input_point = get_inpupt_points(img_path, img) 
+    input_point = get_inpupt_points(img_path) 
     input_label = np.array([1, 1, 1])
 
     masks, scores, logits = predictor.predict(
@@ -241,13 +241,13 @@ def get_best_mask(img_path: str, img: Image):
 
     return best_mask
 
-def get_inpupt_points(img_path: str, img: Image):
+def get_inpupt_points(img_path: str):
     BaseOptions = mp.tasks.BaseOptions
     PoseLandmarker = mp.tasks.vision.PoseLandmarker
     PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    model_path = './backend/app/models/pose_landmarker_lite.task'
+    model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/models/pose_landmarker_lite.task'
 
     options = PoseLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
@@ -256,12 +256,13 @@ def get_inpupt_points(img_path: str, img: Image):
     with PoseLandmarker.create_from_options(options) as landmarker:
         # The landmarker is initialized. Use it here.
         # Load the input image from an image file.
-        mp_image = mp.Image.create_from_file('pictures/woman.jpg') 
+        mp_image = mp.Image.create_from_file(img_path) 
         print(mp_image.width) 
         # Perform pose landmarking on the provided single image.
         # The pose landmarker must be created with the image mode.
         pose_landmarker_result = landmarker.detect(mp_image)          
 
+    img = im =Image.open(img_path)
     width, height = img.size 
 
     nose = pose_landmarker_result.pose_landmarks[0][0]
