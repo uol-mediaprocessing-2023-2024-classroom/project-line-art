@@ -53,7 +53,7 @@
                                 <v-radio-group v-model="currentOptionContours">
                                     <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
                                     <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
-                                    <v-radio label="Select Color" value="SelectColor"></v-radio>
+                                    <v-radio label="Select Color" value="SelectColorContours"></v-radio>
                                     <v-color-picker v-model="selectedColorContours" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
                                 </v-radio-group>
                             </div>
@@ -149,8 +149,8 @@ export default {
 
             currentOptionContours: 'NoColor',
             currentOptionSegments: 'NoColor',
-            selectedColorContours: "#FF0000FF",
-            selectedColorSegments: "#FF0000FF",
+            selectedColorContours: "#FF0000",
+            selectedColorSegments: "#FF0000",
 
             tabs: 'tab1',
 
@@ -265,7 +265,7 @@ export default {
                 return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
             } else{
                 // Fortfahren mit der Bildverarbeitung
-                this.$emit("processImage", selectedId, this.cldId, this.currentOptionSegments, this.currentOptionContours, this.getSelectedColorWithoutHashContours(), this.getSelectedColorWithoutHashSegments());
+                this.$emit("processImage", selectedId, this.cldId, this.currentOptionContours, this.currentOptionSegments, this.getSelectedColorWithoutHashContours(), this.getSelectedColorWithoutHashSegments());
             }
         },
 

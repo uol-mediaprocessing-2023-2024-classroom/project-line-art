@@ -17,7 +17,6 @@ from PIL import Image, ImageFilter
 from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 import torch
 from skimage import filters
-from fastapi.middleware.cors import CORSMiddleware
 from numpy import asarray
 from PIL import Image, ImageOps
 
@@ -41,17 +40,11 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # CORS configuration: specify the origins that are allowed to make cross-site requests
 origins = [
     "https://localhost:8080",
-    "https://localhost:8080/",
     "http://localhost:8080",
-    "http://localhost:8080/",
     "https://localhost:8081",
-    "https://localhost:8081/",
     "http://localhost:8081",
-    "http://localhost:8081/",
     "https://localhost:8082",
-    "https://localhost:8082/",
     "http://localhost:8082",
-    "http://localhost:8082/",
     "*"
 ]
 
@@ -79,7 +72,7 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 @app.get("/")
 def home():
     return {"Test": "Online"}
-
+    
 @app.get("/process-image/{cldId}/{imgId}/{currentOptionContours}/{currentOptionSegments}/{selectedColorContours}/{selectedColorSegments}")
 async def processImage(cldId: str, imgId: str, currentOptionContours: str, currentOptionSegments: str, selectedColorContours: str, selectedColorSegments: str, background_tasks: BackgroundTasks):
     """
@@ -97,22 +90,31 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     
     
     if currentOptionContours == "NoColor":
+        #remove_background('segments_image.png')
+        get_lines_from_segments(img_path, hex_to_rgb("000000"))
+    if currentOptionContours == "Imagebased":
+        #remove_background('segments_image.png')
+        get_lines_from_segments(img_path, mainColor)
+    if currentOptionContours == "SelectColorContours":
+        get_lines_from_segments(img_path, hex_to_rgb(selectedColorContours))
+    if currentOptionSegments == "NoColor":
         newColor = "#000000"
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
-        get_lines_from_segments(img_path, rgb_color)
-    elif currentOptionContours == "Imagebased":
+        
+    if currentOptionSegments == "Imagebased":
         #remove_background('segments_image.png')
-        get_lines_from_segments(img_path, mainColor)
-    elif currentOptionContours == "SelectColor":
-        newColor = "#" + selectedColorContours
-        rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
+        print("test")
+    if currentOptionSegments == "SelectColor":
+        newSelectedColor = "#" + selectedColorSegments
+        rgb_slectedColor = tuple(int(newSelectedColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
-        get_lines_from_segments(img_path, rgb_color)
+        #get_lines_from_segments(img_path, rgb_slectedColor)
+
 
 
     # Schedule the image file to be deleted after the response is sent
-    background_tasks.add_task(remove_file, img_path)
+    #background_tasks.add_task(remove_file, img_path)
 
     # Send the processed image file as a response
     return FileResponse(img_path)
@@ -206,6 +208,13 @@ def get_main_color(image_path):
 
     return main_color_list
 
+def hex_to_rgb(hex_color):
+    # Extrahiere die Hexadezimalzahlen für Rot, Grün und Blau
+    red = int(hex_color[0:2], 16)
+    green = int(hex_color[2:4], 16)
+    blue = int(hex_color[4:6], 16)
+
+    return [red, green, blue]
 
 def get_best_mask(img_path: str, img: Image):
     array_image = np.asarray(img)
