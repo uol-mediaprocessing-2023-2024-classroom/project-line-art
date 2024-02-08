@@ -22,6 +22,8 @@ from numpy import asarray
 from PIL import Image, ImageOps
 
 import mediapipe as mp
+from pydantic import BaseModel
+
 
 #== Parameters =======================================================================
 BLUR = 21
@@ -38,7 +40,6 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 # CORS configuration: specify the origins that are allowed to make cross-site requests
 origins = [
-    CORSMiddleware,
     "https://localhost:8080",
     "https://localhost:8080/",
     "http://localhost:8080",
@@ -63,7 +64,6 @@ app.add_middleware(
 )
 
 
-
 sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
@@ -74,6 +74,13 @@ sam.to(device=device)
 
 predictor = SamPredictor(sam)
 mask_generator = SamAutomaticMaskGenerator(sam)
+
+
+class Settings(BaseModel):
+    currentOptionContours: str
+    currentOptionSegments: str 
+    selectedColorContours: str
+    selectedColorSegments: str
 
 # A simple endpoint to verify that the API is online.
 @app.get("/")
@@ -86,7 +93,7 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     Endpoint to retrieve a processed version of an image.
     The image is fetched from a constructed URL and then processed.
     """
-    img_path = f"app/bib/{imgId}.jpg"
+    img_path = f"./app/bib/{imgId}.jpg"
     image_url = f"https://cmp.photoprintit.com/api/photos/{imgId}.org?size=original&errorImage=false&cldId={cldId}&clientVersion=0.0.1-medienVerDemo"
 
     mainColor = get_main_color(img_path)
@@ -95,8 +102,9 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     masks = get_segments(img_path)
 
     
+    
     if currentOptionContours == "NoColor":
-        newColor = "#" + selectedColorContours
+        newColor = "#000000"
         rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, rgb_color)
