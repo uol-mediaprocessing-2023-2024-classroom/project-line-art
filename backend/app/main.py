@@ -21,7 +21,7 @@ from numpy import asarray
 from PIL import Image, ImageOps
 
 import mediapipe as mp
-from pydantic import BaseModel
+import random
 
 
 #== Parameters =======================================================================
@@ -56,6 +56,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/pose_landmarker_lite.task'
 
 sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
@@ -86,9 +87,8 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     download_image(image_url, img_path)
     remove_background(img_path)
     masks = get_segments(img_path)
-
-    
-    
+    m = get_random_mask(masks)
+    print(m['segmentation'])
     if currentOptionContours == "NoColor":
         #remove_background('segments_image.png')
         get_lines_from_segments(img_path, hex_to_rgb("000000"))
@@ -97,19 +97,17 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
         get_lines_from_segments(img_path, mainColor)
     if currentOptionContours == "SelectColorContours":
         get_lines_from_segments(img_path, hex_to_rgb(selectedColorContours))
-    if currentOptionSegments == "NoColor":
-        newColor = "#000000"
-        rgb_color = tuple(int(newColor[i:i+2], 16) for i in (2, 4, 6))
-        #remove_background('segments_image.png')
-        
-    if currentOptionSegments == "Imagebased":
-        #remove_background('segments_image.png')
-        print("test")
-    if currentOptionSegments == "SelectColor":
-        newSelectedColor = "#" + selectedColorSegments
-        rgb_slectedColor = tuple(int(newSelectedColor[i:i+2], 16) for i in (2, 4, 6))
-        #remove_background('segments_image.png')
-        #get_lines_from_segments(img_path, rgb_slectedColor)
+
+
+    if currentOptionSegments == "NoColor":    
+        i = cv2.imread("contures_img.png")
+        plt.imsave(img_path, i)
+    elif currentOptionSegments ==  "Imagebased":
+        print("imagebased")
+        color_segments(img_path,mainColor, masks)
+    elif currentOptionSegments ==  "Imagebased":
+        print("selected color")
+        color_segments(img_path,hex_to_rgb(selectedColorSegments), masks)
 
 
 
@@ -119,6 +117,41 @@ async def processImage(cldId: str, imgId: str, currentOptionContours: str, curre
     # Send the processed image file as a response
     return FileResponse(img_path)
 
+def color_segments(img_path:str, color: object, masks: object):
+    print("color Segments")
+    mask = get_random_mask(masks)
+    i = cv2.imread("contures_img.png")
+    
+    # Farbe des Segments ändern (hier: Rot)
+    #mask[:, :] = rgb_color
+
+    # Das eingefärbte Segment zurück ins Bild einfügen
+   # bild[startpunkt[1]:endpunkt[1], startpunkt[0]:endpunkt[0]] = segment
+    #plt.imshow(i)
+    
+    #r = show_mask(mask['segmentation'], plt.gca())
+    c = np.array([30/255, 144/255, 255/255, 1])
+
+    mas_array = mask['segmentation']
+    h, w = mas_array.shape[-2:]
+    mask_image = mas_array.reshape(h, w, 1) * c.reshape(1, 1, -1)
+    temp = 255 * mask_image # Now scale by 255
+    s = temp.astype(np.uint8)
+    cv2.imwrite('test_seg.png', s)
+
+    test_one = Image.open('contures_img.png')
+    test_two = Image.open('test_seg.png')
+    x = Image.fromarray(mask_image, 'RGB')
+    Image.blend(test_one, test_two, 0.5).save('result_seg.png')
+    final_result = cv2.imread('result_seg.png')
+    plt.imsave(img_path, final_result)
+
+
+
+def get_random_mask(masks: object):
+    choice = random.choice(masks)
+    print(choice)
+    return choice
 
 def get_segments(img_path: str):
     img = cv2.imread('new_img.png')
@@ -133,7 +166,6 @@ def get_segments(img_path: str):
 
 def get_lines_from_segments(img_path: str, selectedColor: str):
     img = cv2.imread('segments_image.png')
-    gray = cv2.imread('new_img.png')
     # Setting All parameters 
     t_lower = 100  # Lower Threshold
     t_upper = 500  # Upper threshold 
@@ -146,9 +178,8 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     # with Custom Aperture Size 
     edges = cv2.Canny(img, t_lower, t_upper,  
                     apertureSize=aperture_size) 
-    edges = cv2.dilate(edges, kernel)
-    edges = cv2.dilate(edges, kernel)
-    edges = cv2.erode(edges, kernel)
+    #edges = cv2.dilate(edges, kernel)
+    #edges = cv2.erode(edges, kernel)
     
     # Stack arrays in the depth sequence (along the third axis).
     mask_stack = np.dstack([edges]*3)    # Create 3-channel alpha mask
@@ -158,10 +189,10 @@ def get_lines_from_segments(img_path: str, selectedColor: str):
     img         = img.astype('float32') / 255.0                 #  for easy blending
 
     masked = (mask_stack * NEW_LINE_COLOR_normalized) + ((1-mask_stack) * MASK_COLOR) # Blend 
-    
-    cv2.imwrite('edges_image.png', masked)
+
     cv2.imwrite('edges.png', edges)
-    plt.imsave(img_path, masked)
+    #plt.imsave(img_path, masked)
+    plt.imsave("contures_img.png", masked)
 
 # Downloads an image from the specified URL and saves it to the given path.
 def download_image(image_url: str, img_path: str):
@@ -181,7 +212,6 @@ def remove_background(img_path: str):
     # Use the binary mask to combine the original image and the transparency
     new_image[..., :3] = img * binary_mask[..., np.newaxis]
     new_image[..., 3] = binary_mask * 255
-
 
     # Save the result as a PNG file
     cv2.imwrite('new_img.png', new_image)
@@ -247,7 +277,7 @@ def get_inpupt_points(img_path: str):
     PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/models/pose_landmarker_lite.task'
+    model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/pose_landmarker_lite.task'
 
     options = PoseLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
@@ -262,7 +292,7 @@ def get_inpupt_points(img_path: str):
         # The pose landmarker must be created with the image mode.
         pose_landmarker_result = landmarker.detect(mp_image)          
 
-    img = im =Image.open(img_path)
+    img = Image.open(img_path)
     width, height = img.size 
 
     nose = pose_landmarker_result.pose_landmarks[0][0]
@@ -289,17 +319,8 @@ def show_mask(mask, ax, random_color=False):
     h, w = mask.shape[-2:]
     mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
     ax.imshow(mask_image)
+    return ax
 
-def show_points(coords, labels, ax, marker_size=375):
-    pos_points = coords[labels==1]
-    neg_points = coords[labels==0]
-    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
-    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
-
-def show_box(box, ax):
-    x0, y0 = box[0], box[1]
-    w, h = box[2] - box[0], box[3] - box[1]
-    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))
 
 def show_anns(anns):
     if len(anns) == 0:
@@ -318,81 +339,6 @@ def show_anns(anns):
     return i
 
 
-# Opens the image from the given path and applies a box blur effect.
-def process_image(img_path: str):
-    processedImage = Image.open(img_path)
-    processedImage = processedImage.filter(ImageFilter.BoxBlur(10))
-    processedImage.save(img_path)
-    cv2.imwrite('processedImage.png', processedImage)
-
-def process_image_crop(img_path: str):
-    processedImage = io.imread(img_path)
-    gray = cv2.cvtColor(processedImage,cv2.COLOR_BGR2GRAY)
-    
-    #-- Edge detection -------------------------------------------------------------------
-    edges = cv2.Canny(gray, CANNY_THRESH_1, CANNY_THRESH_2)
-    edges = cv2.dilate(edges, None)
-    edges = cv2.erode(edges, None)
-    
-    #-- Find contours in edges, sort by area ---------------------------------------------
-    contour_info = []
-    #_, contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    # Previously, for a previous version of cv2, this line was: 
-    contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    # Thanks to notes from commenters, I've updated the code but left this note
-    for c in contours:
-        contour_info.append((
-            c,
-            cv2.isContourConvex(c),
-            cv2.contourArea(c),
-        ))
-    contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
-    max_contour = contour_info[0]
-    
-    #-- Create empty mask, draw filled polygon on it corresponding to largest contour ----
-    # Mask is black, polygon is white
-    mask = np.zeros(edges.shape)
-    cv2.fillConvexPoly(mask, max_contour[0], (255))
-    
-    # #-- Smooth mask, then blur it --------------------------------------------------------
-    mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
-    mask = cv2.erode(mask, None, iterations=MASK_ERODE_ITER)
-    mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
-    mask_stack = np.dstack([mask]*3)    # Create 3-channel alpha mask
-    
-    #-- Blend masked processedImage into MASK_COLOR background --------------------------------------
-    mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
-    processedImage = processedImage.astype('float32') / 255.0                 #  for easy blending
- 
-    masked = (mask_stack * processedImage) + ((1-mask_stack) * MASK_COLOR) # Blend
-    masked = (masked * 255).astype('uint8')                     # Convert back to 8-bit 
-    
-    # split image into channels
-    c_red, c_green, c_blue = cv2.split(processedImage)
-
-    # merge with mask got on one of a previous steps
-    processedImage_a = cv2.merge((c_red, c_green, c_blue, mask.astype('float32') / 255.0))  
-
-    #cv2.imwrite(img_path, processedImage_a*255.0)
-    plt.imsave(img_path, processedImage_a)
-    
-def process_image_contours(img_path: str):
-    processedImage = io.imread(img_path)
-
-    gray = cv2.cvtColor(processedImage, cv2.COLOR_BGR2GRAY)
-
-    _, binary = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-
-    contours, hierarchy = cv2.findContours(
-        binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-    drawing = np.zeros((gray.shape[0], gray.shape[1], 3), dtype=np.uint8)
-    CountersImg = cv2.drawContours(drawing, contours, -1, (255, 255, 0), 3)
-
-    # save to disk
-    plt.imsave(img_path, CountersImg)
-
-   
 # Deletes the file at the specified path.
 def remove_file(path: str):
     os.unlink(path)

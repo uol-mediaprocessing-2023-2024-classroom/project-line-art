@@ -61,8 +61,7 @@
                                 <v-radio-group v-model="currentOptionSegments">
                                     <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
                                     <v-radio label="Image-based color" value="Imagebased"></v-radio>
-                                    <v-radio label="Select Color" value="SelectColor"></v-radio>
-                                    <v-color-picker v-model="selectedColorSegments" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                                    
                                 </v-radio-group>
                             </div>
                         </div>
