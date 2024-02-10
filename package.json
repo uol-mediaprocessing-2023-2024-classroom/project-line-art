@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
-    "@mdi/js": "^7.3.67",
+    "@mdi/js": "^7.4.47",
+    "fastapi": "^0.0.8",
     "torch": "^0.2.7"
   }
 }
