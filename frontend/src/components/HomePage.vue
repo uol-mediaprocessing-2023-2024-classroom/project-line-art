@@ -41,7 +41,6 @@
                 <div class="subHeader">
 
                 </div>
-            
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
                     <div class="tab">
                         <div class="tab-menu">
@@ -61,7 +60,6 @@
                                 <v-radio-group v-model="currentOptionSegments">
                                     <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
                                     <v-radio label="Image-based color" value="Imagebased"></v-radio>
-                                    
                                 </v-radio-group>
                             </div>
                         </div>
@@ -92,7 +90,6 @@
                    Download Processed Image
                 </v-btn>
             </div>
-
         </div>
   
         <div class="imageGalleryField">
@@ -193,8 +190,8 @@ export default {
             this.switchSite();
         },
 
-         // Helper method for clearing user data from the browsers local storage.
-         handleLogoutResponse() {
+        // Helper method for clearing user data from the browsers local storage.
+        handleLogoutResponse() {
             localStorage.cldId = "";
             localStorage.userName = "";
             localStorage.isLoggedIn = false;
@@ -334,7 +331,6 @@ export default {
     flex-grow: 2;
 
 }
-
 .userInformation {
     display: flex;
     flex-direction: column;
@@ -353,8 +349,6 @@ export default {
 }
 
 /* Main Area CSS */
-
-
 .MainImageArea {
     display: flex;
     flex-direction: row ;
@@ -394,12 +388,6 @@ export default {
     background-color: rgb(249, 251, 255);
 }
 
-.selectSegmentOptionForm{
-    display: flex;
-    padding: 5%;
-    border-color: rgb(249, 251, 255);
-}
-
 /* Kann vielleicht mit selectImageArea zusammen gelegt werden */
 .processedImageArea {
     display: flex;
@@ -414,20 +402,10 @@ export default {
     padding-bottom: 2%;
     margin-bottom: 1%;
 }
-.selectedImageField {
-    display: flex;
-    flex-direction: row;
-    background-color: rgb(249, 251, 255);
-    border-radius: 10px;
-    box-shadow: 0 10px 10px 10px rgba(0, 0, 0, 0.1);
-    color: black;
-    padding: 1%;
-}
 
 .imageGalleryField {
     display: flex;
     flex-direction: column;
-    
     border-radius: 0,1%;
     color: black;
     padding: 0,1%;
@@ -441,9 +419,6 @@ export default {
     max-height: 500px;
 }
 
-.selectedImageInfo {
-    margin-left: 10px;
-}
 
 .basicButton {
     background-color: rgb(249, 251, 255);
@@ -508,12 +483,6 @@ export default {
   background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
 }
 
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  width: 100%; /* Sorgt dafür, dass die Buttons die gesamte Breite nutzen */
-}
-
 .loading-overlay {
 background-color: #F3F3F3;
   min-width: 430px;
@@ -526,14 +495,6 @@ background-color: #F3F3F3;
   font-size: 18px;
   max-width: 430px;
   max-height: 500px;
-}
-
-body {
-    display:flex;
-    align-items: border-box;
-    justify-content: center;
-    padding: 30px;
-    background-color: #f6f8ff;
 }
 
 .tab{
