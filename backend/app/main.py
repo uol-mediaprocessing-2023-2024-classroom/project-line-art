@@ -56,7 +56,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/pose_landmarker_lite.task'
+model_path = './app/pose_landmarker_lite.task'
 
 sam_checkpoint = "./SamCheckpoint/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
@@ -277,7 +277,7 @@ def get_inpupt_points(img_path: str):
     PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    model_path = '/Users/alinameyer/Documents/Master Ol/03 Medienverarbeitung/LineArt/backend/app/pose_landmarker_lite.task'
+    model_path = './app/pose_landmarker_lite.task'
 
     options = PoseLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
