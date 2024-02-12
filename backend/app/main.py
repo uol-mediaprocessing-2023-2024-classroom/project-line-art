@@ -277,11 +277,7 @@ def get_inpupt_points(img_path: str):
     PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-<<<<<<< HEAD
     model_path = 'app/pose_landmarker_lite.task'
-=======
-    model_path = './app/pose_landmarker_lite.task'
->>>>>>> 057df3b686b0f09540fdbbeb09b74b5d18a89dcf
 
     options = PoseLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
