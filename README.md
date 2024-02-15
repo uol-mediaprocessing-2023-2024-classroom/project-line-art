@@ -1,3 +1,4 @@
+
 # LineArt
 Gruppe: Alina Meyer, John-Uwe Riecken, Talea Schweers
 
@@ -45,3 +46,4 @@ After starting, the site can be accessed via localhost.
 
 <strong>Important</strong>: Before shutting down the server, you should log out; otherwise, the client remains logged into the CEWE API without the necessary clId to log out.
 This will happen automatically after one hour, but until then, you cannot log in again.</p>
+
