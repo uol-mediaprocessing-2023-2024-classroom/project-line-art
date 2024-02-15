@@ -6,7 +6,7 @@
 ```
 pip install -r .\requirements.txt
 ```
-
+3. Downloading SAM from "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth" and moving it in the directory: backend/SamCheckpoint
 ## Starting the App
 ```
 uvicorn app.main:app --reload

@@ -20,13 +20,17 @@
             </div>
         </div>
        
-
-
         <div class="MainImageArea">
             <!-- selectImageArea -->
             <div class="selectImageArea">
-                <div class="subHeader">
+                <div>
                     <h2>Selected Image</h2>
+                </div>
+                <div v-if="errorMessage" class="error-message">
+                    <v-btn variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                        <svg-icon type="mdi" :path="pathInformation"></svg-icon>
+                    </v-btn>
+                    {{ errorMessage }}
                 </div>
                 <div class="imageArea">
                     <img class="selectedImg" v-bind:src="selectedImage.url" />
@@ -38,31 +42,54 @@
 
                 </div>
                 <div style="display: flex; flex-grow: 1; flex-direction: column;">
-                    Settings:
-                    <div class="selectSegmentOption">
-                        <v-radio-group>
-                            <v-radio label="No colored Segments" value="no Segments" true-value></v-radio>
-                            <v-radio label="Image-based color" value="Image-based color" ></v-radio>
-                            <v-radio label="Select Color" value="Select Color"></v-radio>
-                            <v-color-picker hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
-                        </v-radio-group>
+                    <div class="tab">
+                        <div class="tab-menu">
+                            <span class="tab-menu-item" :class="{ active: tabs === 'tab1'}"  @click="tabs='tab1'">Contours</span>
+                            <span class="tab-menu-item" :class="{ active: tabs === 'tab2'}" @click="tabs='tab2'">Segments</span>
+                        </div>
+                        <div class="content">
+                            <div class="content-item" :class="{ active: tabs === 'tab1'}">
+                                <v-radio-group v-model="currentOptionContours">
+                                    <v-radio label="No colored Contours" value="NoColor" true-value></v-radio>
+                                    <v-radio label="Image-based contours" value="Imagebased" ></v-radio>
+                                    <v-radio label="Select Color" value="SelectColorContours"></v-radio>
+                                    <v-color-picker v-model="selectedColorContours" hide-canvas hide-inputs style="min-width: 200px; margin-right: 20PX;"></v-color-picker>
+                                </v-radio-group>
+                            </div>
+                            <div class="content-item" :class="{ active: tabs === 'tab2'}">
+                                <v-radio-group v-model="currentOptionSegments">
+                                    <v-radio label="No colored Segments" value="NoColor" true-value></v-radio>
+                                    <v-radio label="Image-based color" value="Imagebased"></v-radio>
+                                </v-radio-group>
+                            </div>
+                        </div>
                     </div>
                     <button class="basicButton" @click="processImage(selectedImage.id)">
-
                         Process
                     </button>
             </div>
             </div>
             <!-- processedImageArea -->
             <div class="processedImageArea">
-                <div class="subHeader">
+                <div>
                     <h2>Processed Image</h2>
                 </div>
-                <div class="imageArea">
-                    <img class="selectedImg" v-bind:src="processedImage.url" />
+                <div v-if="informationImage" class="empty-placeholder">
+                    <v-btn variant="text" style="background-color: transparent; box-shadow: none; shape-image-threshold: inherit;">
+                        <svg-icon type="mdi" ></svg-icon>
+                    </v-btn>
+                    {{ informationImage }}
                 </div>
+                <div class="imageArea">
+                    <div v-if="loading" class="loading-overlay">
+                        Loading...
+                    </div>
+                    <img v-else class="selectedImg" v-bind:src="processedImage.url" />
+                </div>
+                <v-btn @click="downloadProcessedImage" variant="text">
+                   Download Processed Image
+                </v-btn>
             </div>
-
         </div>
   
         <div class="imageGalleryField">
@@ -94,6 +121,7 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiReload } from '@mdi/js';
+import { mdiInformation } from '@mdi/js';
 
 export default {
     name: "HomePage",
@@ -108,14 +136,25 @@ export default {
             userName: "",
             isLoggedIn: false,
             path: mdiReload,
+            pathInformation: mdiInformation,
             // Image related data
             imageInfo: {
                 name: "",
                 avgColor: ""
             },
 
+            currentOptionContours: 'NoColor',
+            currentOptionSegments: 'NoColor',
+            selectedColorContours: "#FF0000",
+            selectedColorSegments: "#FF0000",
+
+            tabs: 'tab1',
+
             // UI related
             loginButtonText: "LOGIN",
+            errorMessage: null,
+            informationImage: null,
+            loading: false, // Ladeeffekt aktivieren/deaktivieren
         };
     },
 
@@ -132,6 +171,14 @@ export default {
             this.$emit("switchSite");
         },
 
+        getSelectedColorWithoutHashContours() {
+            return this.selectedColorContours.replace('#', '');
+        },
+
+        getSelectedColorWithoutHashSegments() {
+            return this.selectedColorSegments.replace('#', '');
+        },
+
         // Helper method called by login(), logs out the user.
         // Also resets saved website data.
         async logout() {
@@ -143,8 +190,8 @@ export default {
             this.switchSite();
         },
 
-         // Helper method for clearing user data from the browsers local storage.
-         handleLogoutResponse() {
+        // Helper method for clearing user data from the browsers local storage.
+        handleLogoutResponse() {
             localStorage.cldId = "";
             localStorage.userName = "";
             localStorage.isLoggedIn = false;
@@ -199,12 +246,29 @@ export default {
         // This method is called when the user clicks/selects an image in the gallery of loaded images.
         updateSelected(selectedId) {
             this.$emit("updateSelected", selectedId, this.cldId);
+            // Setze die Fehlermeldung auf null, wenn die Verarbeitung erfolgreich ist
+            this.errorMessage = null;
+            this.informationImage = null;
         },
 
         // Emit a processImage event with the ID of the selected image.
         processImage(selectedId) {
-            this.$emit("processImage", selectedId, this.cldId);
+            // Füge hier den Code für die Fehlerüberprüfung ein
+            if(!selectedId || selectedId === "placeholder"){
+                // Wenn selectedId nicht vorhanden ist, setze die Fehlermeldung
+                this.errorMessage = "Please select a picture!";
+                this.informationImage = " ";
+                return; // Beende die Methode, um zu verhindern, dass der Rest des Codes ausgeführt wird
+            } else{
+                // Fortfahren mit der Bildverarbeitung
+                this.$emit("processImage", selectedId, this.cldId, this.currentOptionContours, this.currentOptionSegments, this.getSelectedColorWithoutHashContours(), this.getSelectedColorWithoutHashSegments());
+            }
         },
+
+        downloadProcessedImage(){
+            console.log("hey")
+            this.$emit('downloadProcessed')
+        }
     },
 
     computed: {
@@ -238,6 +302,8 @@ export default {
             this.cldId = localStorage.cldId;
             this.userName = localStorage.userName;
             this.isLoggedIn = true;
+
+            this.$emit("loadImages", this.cldId);
         }
     },
 };
@@ -265,7 +331,6 @@ export default {
     flex-grow: 2;
 
 }
-
 .userInformation {
     display: flex;
     flex-direction: column;
@@ -284,13 +349,16 @@ export default {
 }
 
 /* Main Area CSS */
-
-
 .MainImageArea {
     display: flex;
     flex-direction: row ;
     padding: 1%;
-
+    border-radius: 10px;
+    color: black;
+    padding: 1%;
+    margin-top: 1%;
+    max-height: 600px;
+    overflow-y: auto;
 }
 .selectImageArea {
     display: flex;
@@ -304,6 +372,7 @@ export default {
     flex-direction: column;
     align-items: center;
     margin-left: 10px;
+    margin-right: 10px;
     width: 400px;
     height: 100%;
     flex-grow: 1;
@@ -319,12 +388,6 @@ export default {
     background-color: rgb(249, 251, 255);
 }
 
-.selectSegmentOptionForm{
-    display: flex;
-    padding: 5%;
-    border-color: rgb(249, 251, 255);
-}
-
 /* Kann vielleicht mit selectImageArea zusammen gelegt werden */
 .processedImageArea {
     display: flex;
@@ -334,28 +397,18 @@ export default {
 }
 
 .subHeader {
-    min-height: 50px;
+    min-height: 10px;
     height: 10%;
     padding-bottom: 2%;
     margin-bottom: 1%;
-}
-.selectedImageField {
-    display: flex;
-    flex-direction: row;
-    background-color: rgb(249, 251, 255);
-    border-radius: 10px;
-    box-shadow: 0 10px 10px 10px rgba(0, 0, 0, 0.1);
-    color: black;
-    padding: 1%;
 }
 
 .imageGalleryField {
     display: flex;
     flex-direction: column;
-    
-    border-radius: 10px;
+    border-radius: 0,1%;
     color: black;
-    padding: 1%;
+    padding: 0,1%;
     margin-top: 1%;
     max-height: 600px;
     overflow-y: auto;
@@ -366,16 +419,13 @@ export default {
     max-height: 500px;
 }
 
-.selectedImageInfo {
-    margin-left: 10px;
-}
 
 .basicButton {
     background-color: rgb(249, 251, 255);
     padding: 0px 4px 0px 4px;
     margin-right: 5px;
     border-radius: 3px;
-    width: 150px;
+    width: 120px;
     margin: 3px;
     align-self: center;
 }
@@ -423,5 +473,86 @@ export default {
     width: 100px;
     align-self: center;
     margin-top: 10px;
+}
+
+.error-message {
+  color: red;
+}
+
+.empty-placeholder {
+  background-color: transparent; /* Hintergrundfarbe der leeren Zeile */
+}
+
+.loading-overlay {
+background-color: #F3F3F3;
+  min-width: 430px;
+  min-height: 290px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  max-width: 430px;
+  max-height: 500px;
+}
+
+.tab{
+    width: 100%; 
+    max-width: 250px;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px  solid #e3e3e3;
+    font-family: "Roboto", sans-serif;
+    background-color: white;
+    overflow: hidden;
+}
+.tab-menu{
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #ddd;
+}
+.tab-menu-item{
+    flex: 1;
+    padding:16px;
+    font-size: 12px;
+    font-weight: 300;
+    color: #666;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-align: center;
+    box-shadow: 0 2px 0 transparent;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tab-menu-item.active{
+    background: #f5f5f5;
+    color: #000;
+    box-shadow: 0 2px 0 #000;
+}
+
+.content{
+    padding: 10px 32px;
+background-color: #fefefe;
+}
+
+.content-item{
+    height: 0;
+    overflow: hidden;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(-20px);
+    visibility: hidden;
+    transition: all 1s ease;
+}
+
+.content-item.active{
+    height: auto;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
 }
 </style>

@@ -4,7 +4,7 @@
             <!-- Communication between child and parent components can be done using props and events. Props are attributes passed from a parent to a child and can be used within it.
             A child component can emit events, which the parent then may react to. Here "selectedImage" is a prop passed to HomePage. HomePage emits the "fetchImgs" event,
             which triggers the fetchImgs method in App.vue. In this demo this is technically not needed, but since it's a core element of Vue I decided to include it.-->
-            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite"/>
+            <HomePage v-if="home" :selectedImage="selectedImage" :processedImage="processedImage" :currentGallery="currentGallery" @loadImages="loadImages" @updateSelected="updateSelected" @processImage="processImage" @resetGallery="resetGallery" @switchSite="switchSite" @showError="showError" @downloadProcessed='downloadProcessed' ref="homePage"/>
             <LoginPage v-else @switchSide="switchSite"/>
         </v-main>
     </v-app>
@@ -95,8 +95,7 @@ export default {
           It fetches the high-resolution URL of the selected image and updates the selectedImage property. 
         */
         async updateSelected(selectedId, cldId) {
-
-            // Construct URL for fetching the high-resolution image
+             // Construct URL for fetching the high-resolution image
             const url = `https://cmp.photoprintit.com/api/photos/${selectedId}.org?size=original&errorImage=false&cldId=${cldId}&clientVersion=0.0.1-medienVerDemo`;
             const response = await fetch(url);
 
@@ -113,17 +112,47 @@ export default {
         },
 
         /* This method retrieves a processed version of the selected image from the backend. */
-        async processImage(selectedId, cldId) {
+        async processImage(selectedId, cldId, currentOptionContours, currentOptionSegments, selectedColorContours, selectedColorSegments) {
+            this.$refs.homePage.loading = true; // Aktiviere den Ladeeffekt
 
-            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}`;
+            const localUrl = `http://127.0.0.1:8000/process-image/${cldId}/${selectedId}/${currentOptionContours}/${currentOptionSegments}/${selectedColorContours}/${selectedColorSegments}`;
 
-            // Fetch the processed image
-            const response = await fetch(localUrl);
-            const imageBlob = await response.blob();
-            const processedImageUrl = URL.createObjectURL(imageBlob);
+            try{
+                // Fetch the processed image
+                const response = await fetch(localUrl);
+                const imageBlob = await response.blob();
+                const processedImageUrl = URL.createObjectURL(imageBlob);
+                // Update the selected image with the URL of the processed image
+                this.processedImage.url = processedImageUrl;
+            } catch (error) {
+                // Handle error, z.B. zeige Fehlermeldung an
+                this.showError("Fehler beim Laden des Bildes.");
+                this.$refs.homePage.informationImage = " ";
+            } finally {
+                this.$refs.homePage.loading = false; // Deaktiviere den Ladeeffekt, unabhängig vom Erfolg/Fehler
+            }
+        },
 
-            // Update the selected image with the URL of the processed image
-            this.processedImage.url = processedImageUrl;
+        async downloadProcessed() {
+            const imageUrl = this.processedImage.url;
+
+            // Use the fetch API to download the image
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Create a link element
+                    const link = document.createElement('a');
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    link.href = blobUrl;
+                    link.download = `processed_image_${this.processedImage.id}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(blobUrl);
+                })
+                .catch(error => {
+                    console.error('Error downloading processedImage:', error);
+                });
         },
 
         /* This method resets the current gallery and selected image. */
@@ -138,6 +167,14 @@ export default {
                 id: "placeholder"
             };
             this.currentGallery = [];
+        },
+
+        // Methode zum Anzeigen der Fehlermeldung in der HomePage.vue
+        showError(errorMessage) {
+            // Du könntest hier weitere Aktionen durchführen, z.B. Loggen
+            console.error(errorMessage);
+            // Aktualisiere die Fehlermeldung in der HomePage.vue
+            this.$refs.homePage.errorMessage = errorMessage;
         },
     },
 };
