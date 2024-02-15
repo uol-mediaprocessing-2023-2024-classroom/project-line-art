@@ -1,6 +1,6 @@
 
 # LineArt
-Gruppe: Alina Meyer, John-Uwe Riecken, Talea Schweers
+Group: Alina Meyer, John-Uwe Riecken, Talea Schweers
 
 This project is about processing images so that they look hand-drawn. This type of line art is the goal of this project.
 The goal of the project is that a user can have an image edited through a user-friendly web app to make it look hand-drawn without losing the important aspects of the image.
@@ -8,7 +8,7 @@ The goal of the project is that a user can have an image edited through a user-f
 # Backend
 
 ## Setup
-1. Python is required and can be downloaded here: https://www.python.org/downloads/ (I am using Python 3.10)
+1. Python is required and can be downloaded here: https://www.python.org/downloads/ (We are using Python 3.10)
 2. Open the repository directory and execute this command in the terminal:
 ```
 pip install -r .\requirements.txt
